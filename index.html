@@ -1783,6 +1783,36 @@
       flex-wrap: wrap;
     }
 
+    .btn-clientify-json {
+      background: #EDF4F3 !important;
+      color: #426E68 !important;
+      border: 1px solid #C8DBD7 !important;
+      padding: 8px 13px !important;
+      font-weight: 650 !important;
+      border-radius: 9px !important;
+      box-shadow: 0 3px 8px rgba(44, 83, 79, 0.08);
+    }
+
+    .btn-clientify-json:hover {
+      background: #E2EEEB !important;
+      transform: translateY(-1px);
+      box-shadow: 0 7px 15px rgba(44, 83, 79, 0.12);
+    }
+
+    .btn-clientify-json svg {
+      width: 15px;
+      height: 15px;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      fill: none;
+    }
+
+    .executive-actions > .btn-import-file,
+    .executive-actions > .btn-clear-filters {
+      width: auto;
+      flex: 0 0 auto;
+    }
+
     /* Pieza 3D: Islas de Fuentes Separadas */
     .source-islands-wrapper {
       position: relative;
@@ -1807,7 +1837,7 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: #93C5FD;
+      color: #C2D3DD;
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -1817,8 +1847,8 @@
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background: #3B82F6;
-      box-shadow: 0 0 8px #3B82F6;
+      background: #82A8BC;
+      box-shadow: 0 0 8px rgba(130, 168, 188, 0.55);
     }
     .canvas-3d-box {
       width: 100%;
@@ -1854,12 +1884,12 @@
     .island-overlay-left {
       left: 6%;
       top: 20%;
-      border-left: 3px solid #3B82F6;
+      border-left: 3px solid #7FA2BB;
     }
     .island-overlay-right {
       right: 6%;
       top: 20%;
-      border-left: 3px solid #10B981;
+      border-left: 3px solid #80A79A;
     }
     .island-gap-pill {
       position: absolute;
@@ -1867,10 +1897,10 @@
       top: 50%;
       transform: translate(-50%, -50%);
       background: rgba(11, 22, 44, 0.92);
-      border: 1px dashed rgba(239, 68, 68, 0.5);
+      border: 1px dashed rgba(189, 108, 98, 0.55);
       padding: 6px 14px;
       border-radius: 20px;
-      color: #FCA5A5;
+      color: #D7AAA5;
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.03em;
@@ -1882,8 +1912,8 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
     }
     .island-gap-pill.conciliated {
-      border-color: rgba(16, 185, 129, 0.5);
-      color: #6EE7B7;
+      border-color: rgba(128, 167, 154, 0.55);
+      color: #B4D0C5;
     }
 
     /* Banda de Métricas Principales de Portada */
@@ -2047,6 +2077,285 @@
       color: var(--gray-500);
     }
 
+    /* Sistema visual renovado: profundidad sutil, superficies limpias y filtros claros */
+    :root {
+      --fenix-navy-950: #17283F;
+      --fenix-navy-900: #203650;
+      --fenix-navy-800: #2D4A68;
+      --fenix-navy-700: #3E5E7D;
+      --fenix-blue-700: #426F9D;
+      --fenix-blue-600: #5B86B0;
+      --fenix-blue-100: #EAF1F7;
+      --fenix-blue-50: #F4F7FA;
+      --fenix-red-700: #A95852;
+      --fenix-red-600: #BD6C62;
+      --fenix-red-500: #CC7D70;
+      --fenix-red-100: #F5E9E6;
+      --fenix-red-50: #FAF4F2;
+      --fenix-orange-600: #BD6C62;
+      --fenix-orange-500: #CC7D70;
+      --fenix-orange-100: #F5E9E6;
+      --fenix-orange-50: #FAF4F2;
+      --brand-fenix: #557FA8;
+      --brand-maki: #58877E;
+      --brand-solintha: #87799A;
+      --gray-900: #1D2B3D;
+      --gray-800: #334458;
+      --gray-700: #4B5D70;
+      --gray-600: #647589;
+      --gray-500: #7C8B9B;
+      --gray-400: #A2AFBB;
+      --gray-300: #C7D0D9;
+      --gray-200: #DDE4EA;
+      --gray-100: #EDF1F5;
+      --gray-50: #F6F8FA;
+      --shadow-sm: 0 2px 6px rgba(27, 49, 73, 0.05);
+      --shadow-md: 0 8px 20px rgba(27, 49, 73, 0.08), 0 2px 5px rgba(27, 49, 73, 0.04);
+      --shadow-lg: 0 16px 34px rgba(27, 49, 73, 0.12), 0 4px 10px rgba(27, 49, 73, 0.05);
+      --shadow-xl: 0 24px 48px rgba(27, 49, 73, 0.16);
+      --radius-sm: 7px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-xl: 18px;
+    }
+
+    body {
+      background: #F3F6F9;
+      color: var(--gray-800);
+    }
+
+    #sidebar {
+      background: linear-gradient(165deg, #203650 0%, #17283F 100%);
+      box-shadow: 8px 0 28px rgba(23, 40, 63, 0.08);
+    }
+
+    .nav-item {
+      border-radius: 9px;
+    }
+
+    .nav-item.active {
+      background: rgba(129, 170, 191, 0.16);
+      border-color: rgba(176, 205, 216, 0.18);
+      color: #F5FAFC;
+    }
+
+    #sticky-filter-bar {
+      padding: 14px 24px 12px;
+      background: rgba(248, 250, 252, 0.94);
+      border-bottom-color: rgba(199, 208, 217, 0.8);
+      box-shadow: 0 8px 22px rgba(27, 49, 73, 0.055);
+    }
+
+    .filter-grid {
+      gap: 10px 12px;
+      margin-bottom: 10px;
+    }
+
+    .filter-item label {
+      font-size: 10px;
+      letter-spacing: 0.055em;
+      color: #718196;
+    }
+
+    .filter-select,
+    .filter-input {
+      min-height: 38px;
+      border: 1px solid #D7E0E8;
+      border-radius: 9px;
+      background: #FFFFFF;
+      box-shadow: inset 0 1px 2px rgba(27, 49, 73, 0.025);
+    }
+
+    .filter-select:focus,
+    .filter-input:focus {
+      border-color: #7FA2BB;
+      box-shadow: 0 0 0 3px rgba(91, 134, 176, 0.13);
+    }
+
+    .filter-summary-row {
+      gap: 12px;
+      border-top: 1px solid #E7ECF1;
+      padding-top: 10px;
+    }
+
+    .segmented-switch {
+      border-radius: 9px;
+      background: #EDF2F6;
+    }
+
+    .switch-option {
+      border-radius: 7px;
+    }
+
+    .btn-clear-filters,
+    .btn-toggle-filters,
+    .btn-cross-toggle {
+      border-radius: 8px;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .btn-clear-filters:hover,
+    .btn-toggle-filters:hover,
+    .btn-cross-toggle:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tab-content-area {
+      padding: 28px 30px 36px;
+    }
+
+    .executive-header-bar {
+      margin-bottom: 22px;
+      padding-bottom: 18px;
+      border-bottom-color: #E1E7ED;
+    }
+
+    .executive-title-box h1 {
+      font-size: 27px;
+      letter-spacing: -0.035em;
+    }
+
+    #tab-executive.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #tab-executive > .exec-metrics-band {
+      order: 1;
+    }
+
+    #tab-executive > .source-islands-wrapper {
+      order: 2;
+    }
+
+    #tab-executive > .exec-charts-grid {
+      order: 3;
+    }
+
+    .source-islands-wrapper {
+      background:
+        radial-gradient(ellipse at 78% 12%, rgba(93, 143, 159, 0.24), transparent 36%),
+        linear-gradient(135deg, #28445E 0%, #203650 58%, #273D55 100%);
+      border: 1px solid rgba(148, 180, 197, 0.23);
+      border-radius: 17px;
+      box-shadow: 0 16px 30px rgba(29, 49, 71, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      padding: 17px 20px;
+    }
+
+    .canvas-3d-box {
+      height: 220px;
+    }
+
+    .island-card-overlay {
+      border-radius: 12px;
+      box-shadow: 0 12px 25px rgba(8, 20, 33, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .exec-metrics-band {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .exec-metric-card {
+      border: 1px solid #E1E7ED;
+      border-radius: 13px;
+      padding: 17px 18px;
+      box-shadow: 0 5px 15px rgba(27, 49, 73, 0.045), inset 0 1px 0 #FFFFFF;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .exec-metric-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 23px rgba(27, 49, 73, 0.09), inset 0 1px 0 #FFFFFF;
+    }
+
+    .exec-metric-val {
+      letter-spacing: -0.035em;
+    }
+
+    .exec-charts-grid {
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .card,
+    .kpi-card {
+      border-color: #E0E6EC;
+      border-radius: 14px;
+      box-shadow: 0 6px 17px rgba(27, 49, 73, 0.055), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    }
+
+    .card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(27, 49, 73, 0.085), inset 0 1px 0 #FFFFFF;
+    }
+
+    .card-header {
+      border-bottom-color: #E9EEF2;
+    }
+
+    .card-title {
+      letter-spacing: -0.015em;
+    }
+
+    .kpi-card {
+      padding: 19px;
+    }
+
+    .filter-counter-badge {
+      border-radius: 9px;
+      background: #F0F4F7;
+    }
+
+    #block-sales-forecast-cover {
+      display: none !important;
+    }
+
+    .extractor-modal {
+      border-radius: 18px;
+      box-shadow: 0 30px 70px rgba(21, 39, 60, 0.3);
+    }
+
+    .extractor-dropzone {
+      border-radius: 14px;
+      background: #F7F9FB;
+    }
+
+    @media (max-width: 1024px) {
+      #sticky-filter-bar {
+        padding: 12px 16px;
+      }
+
+      .tab-content-area {
+        padding: 20px 18px 28px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .exec-metrics-band {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .canvas-3d-box {
+        height: 250px;
+      }
+
+      #sticky-filter-bar {
+        padding: 10px 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .exec-metrics-band {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
@@ -2058,9 +2367,9 @@
     <div class="sidebar-header">
       <!-- Emblema Geométrico Vectorial Fénix SVG (Rojo Corporativo) -->
       <svg class="fenix-emblem-svg" viewBox="0 0 40 40" fill="none">
-        <polygon points="20,2 38,14 38,26 20,38 2,26 2,14" fill="#0B162C" stroke="#DC2626" stroke-width="2.5"/>
-        <path d="M20 7 L31 16 L20 33 L9 16 Z" fill="#DC2626" opacity="0.9"/>
-        <path d="M20 13 L27 20 L20 29 L13 20 Z" fill="#EF4444"/>
+        <polygon points="20,2 38,14 38,26 20,38 2,26 2,14" fill="#17283F" stroke="#BD6C62" stroke-width="2.5"/>
+        <path d="M20 7 L31 16 L20 33 L9 16 Z" fill="#BD6C62" opacity="0.9"/>
+        <path d="M20 13 L27 20 L20 29 L13 20 Z" fill="#CC7D70"/>
         <circle cx="20" cy="20" r="3" fill="#FFFFFF"/>
       </svg>
       <div>
@@ -2138,7 +2447,7 @@
 
       <!-- Botón Nivel 3: Importar Archivos Directamente -->
             <!-- Botón Nivel 3: Extractor de Carpeta y Excels en Navegador -->
-      <button class="btn-import-file" id="btn-open-extractor" style="background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.4); color: #93C5FD;" title="Selecciona una carpeta o archivos para extraer y consolidar todo en el navegador">
+      <button class="btn-import-file" id="btn-open-extractor" style="background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.4); color: #93C5FD;" title="Selecciona Excels comerciales y exportaciones Clientify para conciliarlos en el navegador">
         <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
         <span>📁 Procesar Carpeta / Excels</span>
       </button>
@@ -2310,13 +2619,18 @@
         <div class="executive-header-bar">
           <div class="executive-title-box">
             <h1>Resumen Ejecutivo</h1>
-            <p>Monitoreo de fuentes comerciales, prospección multimarca y disponibilidad de datos auditados</p>
+            <p>Carga primero los libros Excel y luego importa Clientify JSON para conciliar contactos y revisar el rendimiento comercial.</p>
           </div>
           <div class="executive-actions">
             <button class="btn-import-file" id="btn-exec-load-sources" style="background: var(--fenix-blue-600); color: white; border: none; padding: 7px 14px; font-weight: 600; border-radius: var(--radius-sm); cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
               <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
               <span>Cargar Fuentes</span>
             </button>
+            <button class="btn-import-file btn-clientify-json" id="btn-exec-load-clientify" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg>
+              <span>Importar Clientify JSON</span>
+            </button>
+            <input type="file" id="input-clientify-json" accept=".json,application/json" multiple hidden>
             <button class="btn-clear-filters" id="btn-exec-export" style="background: white; border: 1px solid var(--gray-300); color: var(--gray-700); padding: 7px 14px; font-weight: 500; border-radius: var(--radius-sm); cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
               <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               <span>Exportar</span>
@@ -2372,20 +2686,20 @@
         <div class="exec-metrics-band">
           <div class="exec-metric-card" style="border-top: 3px solid var(--fenix-blue-600);">
             <div class="exec-metric-label">
-              <span>Contactos · 1 Mes</span>
+              <span>Ventas cerradas</span>
               <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;"><rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </div>
-            <div class="exec-metric-val num-mono" id="exec-kpi-leads-1m">—</div>
-            <div class="exec-metric-sub" id="exec-kpi-sub-1m">Ventana de 4 semanas</div>
+            <div class="exec-metric-val num-mono" id="exec-kpi-won-total">—</div>
+            <div class="exec-metric-sub" id="exec-kpi-won-sub">Pendiente de libros comerciales</div>
           </div>
 
           <div class="exec-metric-card" style="border-top: 3px solid var(--fenix-navy-800);">
             <div class="exec-metric-label">
-              <span>Contactos · 3 Meses</span>
+              <span>Forecast ponderado</span>
               <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
             </div>
-            <div class="exec-metric-val num-mono" id="exec-kpi-leads-3m">—</div>
-            <div class="exec-metric-sub" id="exec-kpi-sub-3m">Ventana acumulada</div>
+            <div class="exec-metric-val num-mono" id="exec-kpi-forecast-total">—</div>
+            <div class="exec-metric-sub" id="exec-kpi-forecast-sub">Proyección según probabilidades</div>
           </div>
 
           <div class="exec-metric-card" style="border-top: 3px solid var(--semaforo-verde-led);">
@@ -2399,11 +2713,11 @@
 
           <div class="exec-metric-card" style="border-top: 3px solid var(--gray-400);">
             <div class="exec-metric-label">
-              <span>Oportunidades Asignadas</span>
+              <span>Pipeline abierto</span>
               <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
             </div>
-            <div class="exec-metric-val num-mono" id="exec-kpi-ops-count">—</div>
-            <div class="exec-metric-sub" id="exec-kpi-ops-sub">Libros comerciales</div>
+            <div class="exec-metric-val num-mono" id="exec-kpi-pipeline-total">—</div>
+            <div class="exec-metric-sub" id="exec-kpi-pipeline-sub">Oportunidades en proceso</div>
           </div>
         </div>
 
@@ -2474,13 +2788,6 @@
                 <div class="campaigns-chips-row" id="exec-campaigns-chips-row">
                   <div style="font-size: 11px; color: var(--gray-400); font-style: italic; padding: 4px 0;">Cargue los archivos para visualizar las campañas activas.</div>
                 </div>
-                <div style="margin-top: 10px; font-size: 11px; color: var(--gray-400); font-style: italic;">
-                  * Retorno ROI: Requiere inversión publicitaria y ventas conciliadas.
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
                 <div style="margin-top: 10px; font-size: 11px; color: var(--gray-400); font-style: italic;">
                   * Retorno ROI: Requiere inversión publicitaria y ventas conciliadas.
                 </div>
@@ -3744,7 +4051,7 @@
       <div class="extractor-modal-header">
         <div class="extractor-modal-title">
           <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:#60A5FA;stroke-width:2;fill:none;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
-          <span>Extractor y Consolidación de Excels en el Navegador</span>
+          <span>Conciliación de Excels y Clientify</span>
         </div>
         <button class="drawer-close-btn" id="btn-close-extractor" style="color:#94A3B8;">
           <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;stroke-width:2;fill:none;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -3753,7 +4060,7 @@
 
       <div class="extractor-modal-body">
         <div style="font-size: 13px; color: var(--gray-600); line-height: 1.5;">
-          Selecciona una <strong>carpeta completa</strong> (el navegador explorará todas las subcarpetas recursivamente) o arrastra los archivos <strong>.xlsx</strong>. Todo el procesamiento de limpieza, deduplicación y cálculo financiero se realiza directamente en JavaScript <strong>sin necesidad de Python</strong>.
+          Selecciona una <strong>carpeta completa</strong> con libros comerciales y exportaciones Clientify o arrastra archivos <strong>.xlsx, .xls y .json</strong>. La conciliación se procesa localmente en el navegador.
         </div>
 
         <div class="extractor-dropzone" id="extractor-dropzone">
@@ -3761,8 +4068,8 @@
             <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           </div>
           <div>
-            <div style="font-size: 14px; font-weight: 700; color: var(--gray-800); margin-bottom: 4px;">Selecciona tu Carpeta o Archivos Excel</div>
-            <div style="font-size: 12px; color: var(--gray-500);">Explora recursivamente subdirectorios buscando los Excels de Fénix, Maki y Solintha</div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--gray-800); margin-bottom: 4px;">Selecciona carpeta, Excels o Clientify JSON</div>
+            <div style="font-size: 12px; color: var(--gray-500);">Compara libros comerciales con contactos exportados desde Clientify</div>
           </div>
           <div class="extractor-btn-group">
             <button type="button" class="extractor-btn-primary" id="btn-pick-folder">
@@ -3771,7 +4078,7 @@
             </button>
             <button type="button" class="extractor-btn-secondary" id="btn-pick-files">
               <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              <span>📄 Seleccionar Archivos .xlsx</span>
+              <span>📄 Seleccionar archivos .xlsx, .xls o .json</span>
             </button>
           </div>
         </div>
@@ -3945,7 +4252,8 @@
       // Tipografía empresarial global para todos los gráficos Chart.js
       if (window.Chart) {
         Chart.defaults.font.family = "'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-        Chart.defaults.color = '#334155';
+        Chart.defaults.color = '#647589';
+        Chart.defaults.borderColor = '#E3E9EE';
       }
 
       // ======================================================================
@@ -3955,6 +4263,7 @@
         rawData: null,               // Objeto completo devuelto por extractor.py
         allOpportunities: [],        // Colección de todas las oportunidades (438)
         filteredOpportunities: [],   // Oportunidades tras aplicar filtros globales
+        crmContacts: [],             // Índice CRM en memoria para importaciones por separado
         activeTab: 'tab-executive',  // Pestaña actualmente visible (Portada ejecutiva por defecto)
         windowPeriod: '3m',          // '1m' (375) | '3m' (1,774)
         fiscalMode: 'iva',           // 'iva' | 'neto'
@@ -4567,7 +4876,107 @@
           return { empleado, marca: marca || 'Fenix' };
         },
 
-        async processFileList(files, folderName = "") {
+        parseClientifyJson(jsonText) {
+          const payload = JSON.parse(jsonText);
+          const normalizedKey = (value) => String(value || '')
+            .normalize('NFKD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '');
+          const wrapperKeys = new Set(['contacts', 'contactos', 'clientify_contacts', 'contact_list', 'results', 'data', 'items', 'leads', 'objects', 'records']);
+          const contactKeys = new Set([
+            'id', 'name', 'firstname', 'first_name', 'lastname', 'last_name',
+            'phone', 'mobile', 'company', 'company_name', 'email', 'status',
+            'created', 'created_at', 'owner', 'assigned_to'
+          ]);
+
+          const findContacts = (value) => {
+            if (Array.isArray(value)) {
+              return value.length === 0 || value.some(item => item && typeof item === 'object')
+                ? value
+                : null;
+            }
+            if (!value || typeof value !== 'object') return null;
+
+            for (const [key, nested] of Object.entries(value)) {
+              if (wrapperKeys.has(normalizedKey(key))) {
+                const contacts = findContacts(nested);
+                if (contacts) return contacts;
+              }
+            }
+
+            const keys = Object.keys(value).map(normalizedKey);
+            if (keys.some(key => contactKeys.has(key))) return [value];
+            if (value.contact && typeof value.contact === 'object') return [value.contact];
+            return null;
+          };
+
+          const contacts = findContacts(payload);
+          if (!contacts) {
+            throw new Error('El JSON no contiene una lista reconocible de contactos de Clientify.');
+          }
+
+          const headers = [
+            'id', 'nombre', 'apellido', 'empresa', 'propietario',
+            'origen contacto', 'estado', 'creado', 'etiquetas',
+            'teléfono', 'teléfono adicional'
+          ];
+          const aliases = [
+            ['id', 'contact_id', 'contactid'],
+            ['nombre', 'name', 'full_name', 'fullname', 'first_name', 'firstname', 'nombre_completo', 'nombre del contacto'],
+            ['apellido', 'last_name', 'lastname', 'surname', 'apellidos', 'apellido(s)'],
+            ['empresa', 'company', 'company_name', 'organization', 'organizacion', 'nombre de empresa'],
+            ['propietario', 'owner', 'owner_name', 'contact_owner', 'assigned_to', 'assigned_user', 'responsable'],
+            ['origen contacto', 'source', 'origin', 'lead_source', 'contact_source', 'origen', 'fuente'],
+            ['estado', 'status', 'stage', 'lead_status', 'contact_status', 'estado_crm', 'estado del contacto'],
+            ['creado', 'created_at', 'created', 'created_time', 'date_created', 'created_date', 'fecha_creacion'],
+            ['etiquetas', 'tags', 'labels', 'etiquetas_contacto', 'etiquetas del contacto'],
+            ['teléfono', 'phone', 'telephone', 'phone_number', 'phone_mobile', 'mobile', 'mobile_phone', 'telefono', 'numero de telefono', 'teléfono móvil'],
+            ['teléfono adicional', 'phone2', 'secondary_phone', 'other_phone', 'whatsapp']
+          ];
+          const valueAsText = (value) => {
+            if (value === null || value === undefined) return '';
+            if (Array.isArray(value)) return value.map(valueAsText).filter(Boolean).join(', ');
+            if (typeof value === 'object') {
+              return String(value.name || value.full_name || value.label || value.value ||
+                [value.first_name, value.last_name].filter(Boolean).join(' '));
+            }
+            return String(value).trim();
+          };
+
+          const rows = contacts
+            .filter(contact => contact && typeof contact === 'object' && !Array.isArray(contact))
+            .map(contact => {
+              const fields = { ...contact };
+              ['custom_fields', 'fields', 'contact'].forEach(key => {
+                const nested = contact[key];
+                if (Array.isArray(nested)) {
+                  nested.forEach(field => {
+                    if (field && typeof field === 'object') {
+                      const fieldName = field.name || field.label || field.key;
+                      if (fieldName) fields[fieldName] = field.value ?? field.text ?? field;
+                    }
+                  });
+                } else if (nested && typeof nested === 'object') {
+                  Object.assign(fields, nested);
+                }
+              });
+              const valuesByKey = new Map(
+                Object.entries(fields).map(([key, value]) => [normalizedKey(key), value])
+              );
+              return aliases.map(names => {
+                for (const name of names) {
+                  const value = valuesByKey.get(normalizedKey(name));
+                  if (value !== undefined && value !== null && value !== '') return valueAsText(value);
+                }
+                return '';
+              });
+            });
+
+          return [headers, ...rows];
+        },
+
+        async processFileList(files, folderName = "", options = {}) {
           this.openModal();
           this.clearLog();
           this.log(`Iniciando escaneo inteligente de archivos...`, 'info');
@@ -4577,8 +4986,10 @@
           // 1. Detectar TODOS los archivos de Clientify Contactos (soporta 1 mes, 3 meses, o múltiples exportaciones)
           const crmFiles = allFiles.filter(f => {
             const n = f.name.toLowerCase();
-            return (n.startsWith('clientify_') || n.includes('contactos')) && 
-                   (n.endsWith('.xlsx') || n.endsWith('.xls')) && 
+            const isJson = n.endsWith('.json');
+            const isClientifyName = n.startsWith('clientify_') || n.includes('contactos') || n.includes('clientify') || n.includes('leads');
+            return (options.clientifyOnly || isClientifyName) &&
+                   (n.endsWith('.xlsx') || n.endsWith('.xls') || isJson) &&
                    !f.name.startsWith('~$');
           });
 
@@ -4587,7 +4998,7 @@
             const n = f.name.toLowerCase();
             const isExcel = n.endsWith('.xlsx') || n.endsWith('.xls');
             const isTemp = f.name.startsWith('~$');
-            const isCrm = n.startsWith('clientify_') || n.includes('contactos');
+            const isCrm = n.startsWith('clientify_') || n.includes('clientify') || n.includes('contactos') || n.includes('leads');
             const isDomenica = n.includes('domenica'); // REGLA: DOMENICA NO TOMAR EN CUENTA
             return isExcel && !isTemp && !isCrm && !isDomenica;
           });
@@ -4615,16 +5026,22 @@
           let crmStateCounts = {};
           let crmDates = [];
           let crm1mCount = 0;
+          let crmReadErrors = 0;
 
           if (crmFiles.length > 0) {
             for (let cIdx = 0; cIdx < crmFiles.length; cIdx++) {
               const crmFile = crmFiles[cIdx];
               this.log(`Indexando contactos CRM [${cIdx + 1}/${crmFiles.length}]: ${crmFile.name}...`, 'info');
               try {
-                const crmBuffer = await crmFile.arrayBuffer();
-                const wbCrm = XLSX.read(crmBuffer, { type: 'array', cellDates: true });
-                const sheetName = wbCrm.SheetNames.includes('Contactos') ? 'Contactos' : wbCrm.SheetNames[0];
-                const crmRows = XLSX.utils.sheet_to_json(wbCrm.Sheets[sheetName], { header: 1, defval: null });
+                let crmRows;
+                if (crmFile.name.toLowerCase().endsWith('.json')) {
+                  crmRows = this.parseClientifyJson(await crmFile.text());
+                } else {
+                  const crmBuffer = await crmFile.arrayBuffer();
+                  const wbCrm = XLSX.read(crmBuffer, { type: 'array', cellDates: true });
+                  const sheetName = wbCrm.SheetNames.includes('Contactos') ? 'Contactos' : wbCrm.SheetNames[0];
+                  crmRows = XLSX.utils.sheet_to_json(wbCrm.Sheets[sheetName], { header: 1, defval: null });
+                }
                 
                 if (crmRows.length > 1) {
                   const headers = (crmRows[0] || []).map(h => String(h || '').trim().toLowerCase());
@@ -4669,7 +5086,11 @@
                       origen_contacto: orig,
                       estado_crm: st,
                       creado_iso: created,
-                      etiquetas: tags
+                      etiquetas: tags,
+                      telefonos: phoneCols.map(pc => r[pc])
+                        .filter(Boolean)
+                        .map(value => String(value).replace(/\D/g, '').slice(-9))
+                        .filter(phone => phone.length === 9)
                     };
 
                     if (cid && !crmById[cid]) {
@@ -4712,7 +5133,8 @@
                   this.log(`  ✔️ ${crmFile.name}: ${crmFileAdded} contactos indexados.`, 'info');
                 }
               } catch (errCrm) {
-                this.log(`⚠️ Error leyendo archivo Clientify CRM (${crmFile.name}): ${errCrm.message}`, 'warn');
+                crmReadErrors++;
+                this.log(`Error leyendo archivo Clientify CRM (${crmFile.name}): ${errCrm.message}`, 'error');
               }
             }
 
@@ -4725,10 +5147,124 @@
               crm1mCount = Math.round(totalCrmContacts * 0.21);
             }
 
-            this.log(`✔️ Clientify CRM indexado total: ${totalCrmContacts} contactos consolidados en memoria.`, 'success');
+            state.crmContacts = Object.values(crmById);
+            if (totalCrmContacts > 0) {
+              this.log(`Clientify CRM indexado: ${totalCrmContacts} contactos consolidados en memoria.`, 'success');
+            } else if (crmReadErrors === 0) {
+              this.log('La exportación de Clientify no contiene contactos con un ID válido.', 'warn');
+            }
+          } else if (state.crmContacts.length > 0) {
+            state.crmContacts.forEach(contact => {
+              if (contact.id) crmById[String(contact.id)] = contact;
+              (contact.telefonos || []).forEach(phone => {
+                const digits = String(phone).replace(/\D/g, '');
+                const suffix = digits.length >= 9 ? digits.slice(-9) : digits;
+                if (suffix.length === 9 && !crmByTel[suffix]) crmByTel[suffix] = contact;
+              });
+              const name = normTexto(contact.nombre_completo);
+              if (name && name.length > 4 && !crmByName[name]) crmByName[name] = contact;
+              const company = normTexto(contact.empresa);
+              if (company && company.length > 4 && !crmByName[company]) crmByName[company] = contact;
+              const status = normTexto(contact.estado_crm);
+              const stateName = status.includes('CALIENTE') ? 'Lead Caliente'
+                : status.includes('TEMPLADO') ? 'Lead Templado'
+                : status.includes('FRIO') ? 'Lead Frío'
+                : status.includes('OPORTUNIDAD') ? 'En Oportunidad'
+                : status.includes('PERDIDO') ? 'Lead Perdido'
+                : status.includes('CLIENTE') ? 'Cliente'
+                : 'Otro';
+              crmStateCounts[stateName] = (crmStateCounts[stateName] || 0) + 1;
+              if (contact.creado_iso) {
+                const createdAt = new Date(contact.creado_iso);
+                if (!isNaN(createdAt.getTime())) crmDates.push(createdAt.getTime());
+              }
+            });
+            totalCrmContacts = state.crmContacts.length;
+            if (crmDates.length > 0) {
+              const maxDate = Math.max(...crmDates);
+              crm1mCount = crmDates.filter(time => (maxDate - time) <= 30 * 24 * 60 * 60 * 1000).length;
+            }
+            if (crm1mCount === 0 && totalCrmContacts > 0) crm1mCount = Math.round(totalCrmContacts * 0.21);
+            this.log(`Usando índice Clientify en memoria (${totalCrmContacts} contactos).`, 'info');
           } else if (state.rawData && state.rawData.metadata && state.rawData.metadata.total_contactos_crm) {
             totalCrmContacts = state.rawData.metadata.total_contactos_crm;
             this.log(`Usando índice previo de Clientify CRM (${totalCrmContacts} contactos).`, 'info');
+          }
+
+          if (options.clientifyOnly && crmReadErrors === crmFiles.length) {
+            showToast('No se pudo leer el archivo JSON de Clientify. Revisa el registro de procesamiento.', 'error');
+            return;
+          }
+
+          if (advisorFiles.length === 0 && crmFiles.length > 0 && state.allOpportunities.length > 0) {
+            const normalizeContactText = (value) => String(value || '')
+              .normalize('NFKD')
+              .replace(/[\u0300-\u036f]/g, '')
+              .replace(/\s+/g, ' ')
+              .trim()
+              .toUpperCase();
+            const sourceOpportunities = state.rawData?.data_oportunidades || state.allOpportunities;
+            const updatedOpportunities = sourceOpportunities.map(opportunity => {
+              const contactId = String(opportunity.clientify_id || '');
+              const phoneDigits = String(opportunity.telefono_contacto || '').replace(/\D/g, '');
+              const phoneSuffix = phoneDigits.length >= 9 ? phoneDigits.slice(-9) : phoneDigits;
+              const clientName = normalizeContactText(opportunity.cliente);
+              let contact = (contactId && crmById[contactId]) || null;
+              let method = contact ? 'ID Clientify' : null;
+
+              if (!contact && phoneSuffix.length === 9 && crmByTel[phoneSuffix]) {
+                contact = crmByTel[phoneSuffix];
+                method = 'Teléfono / WhatsApp';
+              }
+              if (!contact && clientName && crmByName[clientName]) {
+                contact = crmByName[clientName];
+                method = 'Nombre / Empresa';
+              }
+
+              const adDetails = window.resolveMetaAdDetails(contact, opportunity.marca);
+              const contactForRecord = contact ? { ...contact } : null;
+              if (contactForRecord) delete contactForRecord.telefonos;
+              return {
+                ...opportunity,
+                crm_contacto: contactForRecord,
+                metodo_cruce: method,
+                campana_nombre: adDetails.campana_nombre,
+                anuncio_nombre: adDetails.anuncio_nombre,
+                anuncio_entrega: adDetails.anuncio_entrega,
+                campana_marca: adDetails.campana_marca || opportunity.marca,
+                canal_entrada: adDetails.canal_entrada,
+                origen_anuncio: adDetails.origen_anuncio
+              };
+            });
+            const previousMetadata = state.rawData?.metadata || {};
+            const result = {
+              ...state.rawData,
+              metadata: {
+                ...previousMetadata,
+                fecha_actualizacion: new Date().toISOString().replace('T', ' ').substring(0, 19),
+                directorio_origen: folderName || 'Clientify CRM',
+                cruce_clientify_activo: totalCrmContacts > 0,
+                total_contactos_crm: totalCrmContacts,
+                contactos_crm_1m: crm1mCount,
+                contactos_crm_3m: totalCrmContacts,
+                estados_crm: crmStateCounts,
+                total_oportunidades_cruzadas: updatedOpportunities.filter(opportunity => opportunity.crm_contacto).length
+              },
+              data_oportunidades: updatedOpportunities
+            };
+
+            this.lastResult = result;
+            document.getElementById('stat-proc-files').textContent = crmFiles.length;
+            document.getElementById('stat-proc-raw').textContent = updatedOpportunities.length;
+            document.getElementById('stat-proc-dup').textContent = result.metadata.total_duplicados_detectados || 0;
+            document.getElementById('stat-proc-clean').textContent = result.metadata.total_registros_limpios || updatedOpportunities.filter(opportunity => !opportunity.es_duplicado).length;
+            document.getElementById('stat-proc-time').textContent = `Clientify actualizado: ${new Date().toLocaleTimeString()}`;
+            document.getElementById('btn-download-datos-js').removeAttribute('disabled');
+            document.getElementById('btn-apply-and-close').style.display = 'inline-flex';
+            this.log(`Clientify actualizado: ${totalCrmContacts} contactos y ${result.metadata.total_oportunidades_cruzadas} oportunidades conciliadas.`, 'success');
+            applyLoadedData(result);
+            showToast(`Clientify actualizado: ${totalCrmContacts.toLocaleString()} contactos`);
+            return;
           }
 
           const STAGE_PROBABILITIES = {
@@ -5197,6 +5733,8 @@
                     metodoCruce = 'Nombre / Empresa';
                   }
                 }
+                const crmContactForRecord = matchCrm ? { ...matchCrm } : null;
+                if (crmContactForRecord) delete crmContactForRecord.telefonos;
 
                 // Atribución de Campaña y Anuncio Meta Ads
                 const adDetails = window.resolveMetaAdDetails(matchCrm, rowMarca);
@@ -5241,7 +5779,7 @@
                   enlace_original: linkParsed.url,
                   tipo_enlace: linkParsed.tipo,
                   clientify_id: linkParsed.id,
-                  crm_contacto: matchCrm,
+                  crm_contacto: crmContactForRecord,
                   metodo_cruce: metodoCruce,
                   campana_nombre: adDetails.campana_nombre,
                   anuncio_nombre: adDetails.anuncio_nombre,
@@ -5761,7 +6299,7 @@
           }
 
           threeScene = new THREE.Scene();
-          threeScene.background = new THREE.Color(0x0B162C);
+          threeScene.background = new THREE.Color(0x203650);
 
           // Cámara Isométrica Suave
           const aspect = width / height;
@@ -5778,11 +6316,11 @@
           const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
           threeScene.add(ambientLight);
 
-          const dirLight = new THREE.DirectionalLight(0x93C5FD, 1.2);
+          const dirLight = new THREE.DirectionalLight(0xB7CAD5, 1.05);
           dirLight.position.set(120, 200, 80);
           threeScene.add(dirLight);
 
-          const redFillLight = new THREE.DirectionalLight(0xEF4444, 0.3);
+          const redFillLight = new THREE.DirectionalLight(0xCC7D70, 0.18);
           redFillLight.position.set(-100, 50, -100);
           threeScene.add(redFillLight);
 
@@ -5791,7 +6329,7 @@
           
           // Material podio Clientify (Azul Marino Profundo con borde zafiro)
           const matClientify = new THREE.MeshStandardMaterial({
-            color: 0x1E3A8A,
+            color: 0x36536F,
             metalness: 0.2,
             roughness: 0.3
           });
@@ -5801,7 +6339,7 @@
 
           // Tapa superior con grid zafiro
           const topGeom = new THREE.PlaneGeometry(106, 86);
-          const topMat = new THREE.MeshBasicMaterial({ color: 0x2563EB, wireframe: true });
+          const topMat = new THREE.MeshBasicMaterial({ color: 0x6D91AA, wireframe: true });
           const clientifyGrid = new THREE.Mesh(topGeom, topMat);
           clientifyGrid.rotation.x = -Math.PI / 2;
           clientifyGrid.position.set(-85, 11.2, 0);
@@ -5809,7 +6347,7 @@
 
           // Capa de Catálogo Meta Ads (Pequeño disco superpuesto en Clientify)
           const catGeom = new THREE.CylinderGeometry(18, 18, 5, 24);
-          const catMat = new THREE.MeshStandardMaterial({ color: 0x60A5FA, metalness: 0.4, roughness: 0.2 });
+          const catMat = new THREE.MeshStandardMaterial({ color: 0x88AABD, metalness: 0.25, roughness: 0.3 });
           const catDisc = new THREE.Mesh(catGeom, catMat);
           catDisc.position.set(-85, 14, 0);
           threeScene.add(catDisc);
@@ -5817,7 +6355,7 @@
           // ISLA 2: EXCELS COMERCIALES (Derecha)
           const isExcelLoaded = (state.allOpportunities && state.allOpportunities.length > 0);
           const matExcel = new THREE.MeshStandardMaterial({
-            color: isExcelLoaded ? 0x065F46 : 0x1E293B,
+            color: isExcelLoaded ? 0x496F66 : 0x31485F,
             metalness: 0.2,
             roughness: 0.4
           });
@@ -5827,7 +6365,7 @@
 
           // Tapa superior Excel
           const topMatExcel = new THREE.MeshBasicMaterial({ 
-            color: isExcelLoaded ? 0x10B981 : 0x475569, 
+            color: isExcelLoaded ? 0x80A79A : 0x6B8090,
             wireframe: true 
           });
           const excelGrid = new THREE.Mesh(topGeom, topMatExcel);
@@ -5888,23 +6426,23 @@
 
         // Fondo degradado
         const grad = ctx.createLinearGradient(0, 0, w, h);
-        grad.addColorStop(0, '#0B162C');
-        grad.addColorStop(1, '#13223F');
+        grad.addColorStop(0, '#28445E');
+        grad.addColorStop(1, '#203650');
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, w, h);
 
         // Isla 1: Clientify
-        ctx.fillStyle = '#1E3A8A';
+        ctx.fillStyle = '#36536F';
         ctx.fillRect(w * 0.15, h * 0.35, w * 0.28, h * 0.35);
-        ctx.strokeStyle = '#3B82F6';
+        ctx.strokeStyle = '#6D91AA';
         ctx.lineWidth = 2;
         ctx.strokeRect(w * 0.15, h * 0.35, w * 0.28, h * 0.35);
 
         // Isla 2: Excels
         const loaded = (state.allOpportunities && state.allOpportunities.length > 0);
-        ctx.fillStyle = loaded ? '#065F46' : '#1E293B';
+        ctx.fillStyle = loaded ? '#496F66' : '#31485F';
         ctx.fillRect(w * 0.57, h * 0.35, w * 0.28, h * 0.35);
-        ctx.strokeStyle = loaded ? '#10B981' : '#64748B';
+        ctx.strokeStyle = loaded ? '#80A79A' : '#6B8090';
         ctx.strokeRect(w * 0.57, h * 0.35, w * 0.28, h * 0.35);
       }
 
@@ -5937,15 +6475,12 @@
         if (elCliCount) elCliCount.textContent = hasCrm ? `${activeCrmCount.toLocaleString()} Leads` : 'Sin Cargar';
         if (elCliWin) elCliWin.textContent = hasCrm ? `Clientify CRM · ${crmWinLabel}` : 'Pendiente';
 
-        // Tarjetas KPI de Contactos (Banda Principal)
-        const elKpi1m = document.getElementById('exec-kpi-leads-1m');
-        const elKpiSub1m = document.getElementById('exec-kpi-sub-1m');
-        const elKpi3m = document.getElementById('exec-kpi-leads-3m');
-        const elKpiSub3m = document.getElementById('exec-kpi-sub-3m');
-        if (elKpi1m) elKpi1m.textContent = hasCrm ? crm1m.toLocaleString() : 'Sin Cargar';
-        if (elKpiSub1m) elKpiSub1m.textContent = hasCrm ? 'Ventana de 4 semanas (CRM)' : 'Pendiente de archivo CRM';
-        if (elKpi3m) elKpi3m.textContent = hasCrm ? crm3m.toLocaleString() : 'Sin Cargar';
-        if (elKpiSub3m) elKpiSub3m.textContent = hasCrm ? 'Ventana acumulada (CRM)' : 'Pendiente de archivo CRM';
+        const elKpiWon = document.getElementById('exec-kpi-won-total');
+        const elKpiWonSub = document.getElementById('exec-kpi-won-sub');
+        const elKpiForecast = document.getElementById('exec-kpi-forecast-total');
+        const elKpiForecastSub = document.getElementById('exec-kpi-forecast-sub');
+        const elKpiPipeline = document.getElementById('exec-kpi-pipeline-total');
+        const elKpiPipelineSub = document.getElementById('exec-kpi-pipeline-sub');
 
         const hasAnyData = state.allOpportunities && state.allOpportunities.length > 0;
         const allClean = (state.auditMode === 'clean')
@@ -5963,7 +6498,12 @@
         const totalWonCount = allClean.filter(o => o.etapa === 'Cliente Ganado').length;
         const totalPipeMoney = allClean.filter(o => o.etapa !== 'Cliente Ganado' && o.etapa !== 'Cerrado-Perdido' && o.etapa !== 'Sin Etapa').reduce((acc, o) => acc + (state.fiscalMode === 'iva' ? o.monto_iva : o.monto_neto), 0);
         const totalPipeCount = allClean.filter(o => o.etapa !== 'Cliente Ganado' && o.etapa !== 'Cerrado-Perdido' && o.etapa !== 'Sin Etapa').length;
-        const totalForecast = allClean.reduce((acc, o) => acc + (o.monto_ponderado_iva || 0), 0);
+        const totalForecast = allClean.reduce((acc, o) => {
+          const weightedAmount = state.fiscalMode === 'iva'
+            ? (o.monto_ponderado_iva || 0)
+            : ((o.monto_neto || 0) * (o.probabilidad || 0));
+          return acc + weightedAmount;
+        }, 0);
 
         // Conversión a cliente y total de oportunidades
         const crRate = (hasCrm && activeCrmCount > 0)
@@ -5972,19 +6512,25 @@
 
         const elCrRate = document.getElementById('exec-kpi-cr-rate');
         const elCrSub = document.getElementById('exec-kpi-cr-sub');
-        const elOpsCount = document.getElementById('exec-kpi-ops-count');
-        const elOpsSub = document.getElementById('exec-kpi-ops-sub');
 
         if (hasData) {
+          if (elKpiWon) elKpiWon.textContent = formatMoney(totalWonMoney);
+          if (elKpiWonSub) elKpiWonSub.textContent = `${totalWonCount} oportunidades ganadas`;
+          if (elKpiForecast) elKpiForecast.textContent = formatMoney(totalForecast);
+          if (elKpiForecastSub) elKpiForecastSub.textContent = 'Proyección ponderada del pipeline';
+          if (elKpiPipeline) elKpiPipeline.textContent = formatMoney(totalPipeMoney);
+          if (elKpiPipelineSub) elKpiPipelineSub.textContent = `${totalPipeCount} oportunidades abiertas`;
           if (elCrRate) elCrRate.textContent = `${crRate}%`;
           if (elCrSub) elCrSub.textContent = hasCrm ? `~${crRate}% sobre ${activeCrmCount.toLocaleString()} leads CRM` : `Sobre ${allClean.length} ops en libros`;
-          if (elOpsCount) elOpsCount.textContent = `${allClean.length} Ops`;
-          if (elOpsSub) elOpsSub.textContent = `${totalWonCount} ventas ganadas registradas`;
         } else {
+          if (elKpiWon) elKpiWon.textContent = '—';
+          if (elKpiWonSub) elKpiWonSub.textContent = 'Pendiente de libros comerciales';
+          if (elKpiForecast) elKpiForecast.textContent = '—';
+          if (elKpiForecastSub) elKpiForecastSub.textContent = 'Proyección según probabilidades';
+          if (elKpiPipeline) elKpiPipeline.textContent = '—';
+          if (elKpiPipelineSub) elKpiPipelineSub.textContent = 'Oportunidades en proceso';
           if (elCrRate) elCrRate.textContent = '—';
           if (elCrSub) elCrSub.textContent = 'Pendiente de datos';
-          if (elOpsCount) elOpsCount.textContent = 'Sin Cargar';
-          if (elOpsSub) elOpsSub.textContent = 'Pendiente de Excels';
         }
 
         const cruzadasCount = allClean.filter(o => o.crm_contacto).length;
@@ -8918,6 +9464,18 @@
 
         const inputFolder = document.getElementById('input-folder-upload');
         const inputFiles = document.getElementById('input-files-upload');
+        const clientifyJsonInput = document.getElementById('input-clientify-json');
+        const clientifyJsonButton = document.getElementById('btn-exec-load-clientify');
+
+        if (clientifyJsonButton && clientifyJsonInput) {
+          clientifyJsonButton.addEventListener('click', () => clientifyJsonInput.click());
+          clientifyJsonInput.addEventListener('change', (e) => {
+            if (e.target.files && e.target.files.length > 0) {
+              window.FenixClientExtractor.processFileList(e.target.files, 'Clientify CRM', { clientifyOnly: true });
+            }
+            e.target.value = '';
+          });
+        }
 
         const btnPickFolder = document.getElementById('btn-pick-folder');
         if (btnPickFolder && inputFolder) {
