@@ -2244,7 +2244,286 @@
     }
 
     .canvas-3d-box {
-      height: 220px;
+      height: 270px;
+      overflow: hidden;
+      border-radius: 13px;
+      background:
+        radial-gradient(ellipse at 50% 50%, rgba(111, 151, 172, 0.13), transparent 58%),
+        linear-gradient(135deg, rgba(20, 39, 58, 0.5), rgba(22, 43, 61, 0.2));
+      border: 1px solid rgba(189, 208, 220, 0.1);
+      perspective: 1000px;
+    }
+
+    .source-flow-illustration {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+    }
+
+    .source-flow-illustration .flow-path {
+      fill: none;
+      stroke: rgba(162, 190, 204, 0.35);
+      stroke-width: 2;
+      stroke-dasharray: 5 7;
+      vector-effect: non-scaling-stroke;
+      transition: stroke 0.25s ease, stroke-width 0.25s ease;
+    }
+
+    .source-flow-illustration .match-path {
+      fill: none;
+      stroke: #A7C7BB;
+      stroke-width: 3;
+      stroke-dasharray: 8 8;
+      vector-effect: non-scaling-stroke;
+      opacity: 0.45;
+      transition: opacity 0.25s ease, stroke-width 0.25s ease;
+    }
+
+    .source-flow-illustration.is-conciliated .match-path {
+      opacity: 1;
+      stroke-width: 4;
+      animation: match-flow 1.8s linear infinite;
+    }
+
+    .source-flow-illustration .flow-node {
+      fill: #A7C7BB;
+      stroke: #E4F0EB;
+      stroke-width: 2;
+      vector-effect: non-scaling-stroke;
+      filter: drop-shadow(0 0 8px rgba(167, 199, 187, 0.62));
+    }
+
+    .source-flow-illustration .flow-node.crm-node {
+      fill: #90B2C7;
+      stroke: #DCEAF1;
+      filter: drop-shadow(0 0 7px rgba(144, 178, 199, 0.45));
+    }
+
+    .source-flow-illustration .flow-stage {
+      fill: #2D4A62;
+      stroke: #A9C1CF;
+      stroke-width: 1.5;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .source-flow-illustration .flow-stage.match-stage {
+      fill: #46665F;
+      stroke: #A7C7BB;
+    }
+
+    .source-flow-illustration .flow-label {
+      fill: #D9E4EA;
+      font: 600 11px var(--font-sans);
+      letter-spacing: 0.02em;
+    }
+
+    .source-flow-illustration .flow-caption {
+      fill: #9EB1BE;
+      font: 500 9px var(--font-sans);
+    }
+
+    @keyframes match-flow {
+      to { stroke-dashoffset: -32; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .source-flow-illustration *,
+      .source-flow-illustration .match-path {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+
+    .crm-range-control {
+      display: flex;
+      align-items: end;
+      gap: 10px;
+      padding: 8px 10px;
+      border: 1px solid rgba(187, 207, 218, 0.17);
+      border-radius: 10px;
+      background: rgba(15, 31, 47, 0.38);
+    }
+
+    .crm-range-control label {
+      display: grid;
+      gap: 4px;
+      color: #C0D0D9;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .crm-range-control input[type="date"] {
+      min-height: 32px;
+      width: 138px;
+      padding: 4px 7px;
+      border: 1px solid #647F91;
+      border-radius: 7px;
+      background: #243E55;
+      color: #F4F7F9;
+      font: 500 11px var(--font-mono);
+      color-scheme: dark;
+    }
+
+    .crm-range-control input[type="date"]:focus {
+      outline: 2px solid rgba(160, 194, 208, 0.55);
+      outline-offset: 1px;
+    }
+
+    .crm-range-summary {
+      min-width: 120px;
+      padding-left: 8px;
+      border-left: 1px solid rgba(187, 207, 218, 0.18);
+      color: #D6E2E8;
+      font-size: 10px;
+      line-height: 1.45;
+    }
+
+    .crm-range-summary strong {
+      display: block;
+      color: #FFFFFF;
+      font: 700 15px var(--font-mono);
+    }
+
+    .crm-range-summary.is-invalid {
+      color: #E8B7AF;
+    }
+
+    .tab-visual-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .visual-summary-card {
+      min-height: 152px;
+      padding: 17px;
+      border: 1px solid #E0E6EC;
+      border-radius: 14px;
+      background: linear-gradient(155deg, #FFFFFF, #F7F9FB);
+      box-shadow: 0 7px 18px rgba(27, 49, 73, 0.055), inset 0 1px 0 #FFFFFF;
+    }
+
+    .visual-summary-card h3 {
+      margin-bottom: 4px;
+      color: var(--gray-800);
+      font-size: 12px;
+    }
+
+    .visual-summary-card p {
+      margin-bottom: 12px;
+      color: var(--gray-500);
+      font-size: 10px;
+    }
+
+    .cross-flow-track {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 54px;
+      overflow: hidden;
+    }
+
+    .cross-flow-node {
+      display: grid;
+      place-items: center;
+      min-width: 52px;
+      height: 42px;
+      padding: 4px 7px;
+      border: 1px solid #D8E2E9;
+      border-radius: 10px;
+      background: #FFFFFF;
+      color: #53677A;
+      font-size: 9px;
+      font-weight: 700;
+      text-align: center;
+      box-shadow: 0 3px 7px rgba(27, 49, 73, 0.06);
+    }
+
+    .cross-flow-node.primary {
+      border-color: #AFC6D5;
+      background: #EFF5F8;
+      color: #43657E;
+    }
+
+    .cross-flow-node.secondary {
+      border-color: #B6D0C7;
+      background: #EFF6F2;
+      color: #4E7669;
+    }
+
+    .cross-flow-link {
+      flex: 1;
+      min-width: 10px;
+      height: 2px;
+      background: linear-gradient(90deg, #9EB6C5, #87AE9E);
+      position: relative;
+    }
+
+    .cross-flow-link::after {
+      content: '';
+      position: absolute;
+      right: -1px;
+      top: -3px;
+      width: 7px;
+      height: 7px;
+      border-top: 2px solid #87AE9E;
+      border-right: 2px solid #87AE9E;
+      transform: rotate(45deg);
+    }
+
+    .cross-metric-value {
+      color: var(--fenix-navy-900);
+      font: 700 25px var(--font-mono);
+      letter-spacing: -0.05em;
+    }
+
+    .cross-metric-caption {
+      margin-top: 3px;
+      color: var(--gray-500);
+      font-size: 10px;
+    }
+
+    .visual-rank-bars {
+      display: grid;
+      gap: 8px;
+    }
+
+    .visual-rank-row {
+      display: grid;
+      grid-template-columns: minmax(60px, 0.7fr) 1.3fr auto;
+      align-items: center;
+      gap: 8px;
+      color: #53677A;
+      font-size: 10px;
+    }
+
+    .visual-rank-track {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: #E8EEF2;
+    }
+
+    .visual-rank-fill {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #718FA8, #8CB3A4);
+      transition: width 0.45s ease;
+    }
+
+    .visual-rank-row strong {
+      color: var(--gray-700);
+      font: 600 10px var(--font-mono);
+    }
+
+    .table-last-section {
+      order: 99;
     }
 
     .island-card-overlay {
@@ -2343,7 +2622,19 @@
       }
 
       .canvas-3d-box {
-        height: 250px;
+        height: 240px;
+      }
+
+      .crm-range-control {
+        flex-wrap: wrap;
+      }
+
+      .crm-range-control input[type="date"] {
+        width: 130px;
+      }
+
+      .tab-visual-grid {
+        grid-template-columns: 1fr;
       }
 
       #sticky-filter-bar {
@@ -2643,38 +2934,98 @@
           <div class="islands-top-bar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <div style="display: flex; align-items: center; gap: 8px;">
               <span class="islands-badge-tag">Arquitectura de Datos · Fenix Precision</span>
-              <span style="font-size: 11px; color: #94A3B8;">Isometría de disponibilidad y separación de fuentes</span>
+              <span style="font-size: 11px; color: #B4C4CE;">Fechas de creación del contacto · inclusivas</span>
             </div>
-            <!-- ZONA DEDICADA: Selector de Corte Documental Clientify CRM -->
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 11px; color: #93C5FD; font-weight: 600;">Corte Documental CRM:</span>
-              <div class="segmented-switch switch-window-period" id="switch-window-period-exec" style="background: rgba(15,23,42,0.7); border: 1px solid rgba(255,255,255,0.18);">
-                <div class="switch-option" data-window="1m" id="exec-opt-window-1m" title="Ventana del último mes / 4 semanas">1 Mes</div>
-                <div class="switch-option active" data-window="3m" id="exec-opt-window-3m" title="Ventana acumulada de 3 meses">3 Meses</div>
+            <div class="crm-range-control" aria-label="Filtrar contactos CRM por fecha de creación">
+              <label for="input-clientify-date-start">Desde
+                <input type="date" id="input-clientify-date-start" aria-label="Fecha inicial de Clientify">
+              </label>
+              <label for="input-clientify-date-end">Hasta
+                <input type="date" id="input-clientify-date-end" aria-label="Fecha final de Clientify">
+              </label>
+              <div class="crm-range-summary" id="clientify-range-summary" aria-live="polite">
+                <strong id="clientify-range-count">0</strong>
+                <span id="clientify-range-detail">contactos en el rango</span>
               </div>
             </div>
           </div>
 
           <div class="canvas-3d-box" id="container-3d-islands">
-            <canvas id="canvas-source-islands"></canvas>
+            <svg class="source-flow-illustration" id="source-flow-illustration" viewBox="0 0 1100 280" role="img" aria-labelledby="source-flow-title source-flow-description" preserveAspectRatio="xMidYMid meet">
+              <title id="source-flow-title">Flujo de conciliación entre Clientify y los libros Excel</title>
+              <desc id="source-flow-description">Contactos del CRM se comparan con oportunidades comerciales mediante el identificador, teléfono y nombre de empresa.</desc>
+              <defs>
+                <linearGradient id="flow-base-gradient" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#45627A"/>
+                  <stop offset="1" stop-color="#2D465D"/>
+                </linearGradient>
+                <linearGradient id="flow-match-gradient" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0" stop-color="#8FB4C8"/>
+                  <stop offset="1" stop-color="#A7C7BB"/>
+                </linearGradient>
+                <filter id="flow-shadow" x="-30%" y="-30%" width="160%" height="180%">
+                  <feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#091725" flood-opacity=".34"/>
+                </filter>
+              </defs>
+              <path class="flow-path" d="M250 68 C335 68 365 105 445 105"/>
+              <path class="flow-path" d="M250 140 C335 140 365 140 445 140"/>
+              <path class="flow-path" d="M250 212 C335 212 365 175 445 175"/>
+              <path class="flow-path" d="M655 105 C735 105 765 68 850 68"/>
+              <path class="flow-path" d="M655 140 C735 140 765 140 850 140"/>
+              <path class="flow-path" d="M655 175 C735 175 765 212 850 212"/>
+              <path class="match-path" id="source-match-path" d="M250 140 C360 232 740 232 850 140"/>
+              <g filter="url(#flow-shadow)">
+                <path d="M54 49 172 31l75 38v148l-75 32-118-31z" fill="#20384E" stroke="#7898AC" stroke-width="1.5"/>
+                <path d="m54 49 118 39 75-19M172 88v161M54 49v169" fill="none" stroke="#7898AC" stroke-width="1.2"/>
+                <path d="m66 62 96 32v16L66 79zM66 92l96 32v16L66 109zM66 122l96 32v16L66 139z" fill="#7398AF" opacity=".36"/>
+                <circle cx="200" cy="90" r="7" fill="#A3C4D5"/><circle cx="200" cy="125" r="7" fill="#A3C4D5"/><circle cx="200" cy="160" r="7" fill="#A3C4D5"/>
+                <text x="64" y="202" class="flow-label">CLIENTIFY</text>
+                <text x="64" y="219" class="flow-caption">Contactos · origen · estado</text>
+              </g>
+              <g filter="url(#flow-shadow)">
+                <path d="M445 94 550 67l105 27v92l-105 29-105-29z" fill="url(#flow-base-gradient)" stroke="#A9C1CF" stroke-width="1.5"/>
+                <path d="m445 94 105 31 105-31M550 125v90" fill="none" stroke="#A9C1CF" stroke-width="1.2"/>
+                <path d="m470 107 80 24 80-24v21l-80 23-80-23z" fill="#6F91A5" opacity=".64"/>
+                <circle cx="550" cy="98" r="27" fill="#A9C1CF" opacity=".12" stroke="#C4D7E0" stroke-width="1.5"/>
+                <path d="M539 98h22M550 87v22" stroke="#D7E4E9" stroke-width="2" stroke-linecap="round"/>
+                <text x="550" y="174" class="flow-label" text-anchor="middle">CRUCE DE DATOS</text>
+                <text x="550" y="191" class="flow-caption" text-anchor="middle">ID · teléfono · nombre / empresa</text>
+              </g>
+              <g filter="url(#flow-shadow)">
+                <path d="m853 52 119-21 75 39v142l-75 37-119-31z" fill="#20384E" stroke="#88AA9D" stroke-width="1.5"/>
+                <path d="m853 52 119 39 75-21m-75 21v166M853 52v166" fill="none" stroke="#88AA9D" stroke-width="1.2"/>
+                <path d="m865 67 96 32v16l-96-32zM865 98l96 32v16l-96-32zM865 129l96 32v16l-96-32z" fill="#83A99A" opacity=".38"/>
+                <circle cx="999" cy="95" r="7" fill="#B0CCBE"/><circle cx="999" cy="130" r="7" fill="#B0CCBE"/><circle cx="999" cy="165" r="7" fill="#B0CCBE"/>
+                <text x="872" y="202" class="flow-label">OPORTUNIDADES EXCEL</text>
+                <text x="872" y="219" class="flow-caption">Asesor · etapa · monto</text>
+              </g>
+              <g>
+                <circle class="flow-node crm-node" cx="250" cy="68" r="5"/><circle class="flow-node crm-node" cx="250" cy="140" r="5"/><circle class="flow-node crm-node" cx="250" cy="212" r="5"/>
+                <circle class="flow-node" cx="850" cy="68" r="5"/><circle class="flow-node" cx="850" cy="140" r="5"/><circle class="flow-node" cx="850" cy="212" r="5"/>
+                <rect class="flow-stage" x="425" y="96" width="24" height="18" rx="5"/><rect class="flow-stage match-stage" x="425" y="131" width="24" height="18" rx="5"/><rect class="flow-stage" x="425" y="166" width="24" height="18" rx="5"/>
+                <rect class="flow-stage" x="651" y="96" width="24" height="18" rx="5"/><rect class="flow-stage match-stage" x="651" y="131" width="24" height="18" rx="5"/><rect class="flow-stage" x="651" y="166" width="24" height="18" rx="5"/>
+                <circle class="flow-node" cx="430" cy="105" r="3"/><circle class="flow-node" cx="430" cy="140" r="3"/><circle class="flow-node" cx="430" cy="175" r="3"/>
+                <circle class="flow-node" cx="670" cy="105" r="3"/><circle class="flow-node" cx="670" cy="140" r="3"/><circle class="flow-node" cx="670" cy="175" r="3"/>
+              </g>
+            </svg>
 
             <!-- Overlay HTML accesible: Isla 1 (Clientify) -->
             <div class="island-card-overlay island-overlay-left" id="card-island-clientify" title="Click para ver detalle de contactos de Clientify CRM">
-              <div style="font-size: 11px; text-transform: uppercase; color: #93C5FD; font-weight: 600;">Fuente Documentada</div>
+              <div style="font-size: 11px; text-transform: uppercase; color: #AFC8D7; font-weight: 600;">Base Clientify</div>
               <div style="font-size: 18px; font-weight: 700; margin: 2px 0;" class="num-mono" id="island-clientify-count">—</div>
-              <div style="font-size: 11px; color: #CBD5E1;">Clientify CRM · <span id="island-clientify-window">Pendiente</span></div>
-              <div style="margin-top: 4px; font-size: 10px; color: #60A5FA;">● Catálogo Meta Ads vinculado</div>
+              <div style="font-size: 11px; color: #CBD5E1;"><span id="island-clientify-window">Contactos CRM</span></div>
+              <div style="margin-top: 4px; font-size: 10px; color: #AFC8D7;">● Filtrados por fecha de creación</div>
             </div>
 
             <!-- Separación Central: Sin Conciliación -->
             <div class="island-gap-pill" id="island-separation-badge">
-              <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              <span id="island-separation-text">Sin conciliación a nivel de registro</span>
+              <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;"><path d="m5 12 4 4L19 6"/></svg>
+              <span id="island-separation-text">Conciliación pendiente</span>
             </div>
 
             <!-- Overlay HTML accesible: Isla 2 (Excels Comerciales) -->
             <div class="island-card-overlay island-overlay-right" id="card-island-excel" title="Click para cargar o revisar libros Excel">
-              <div style="font-size: 11px; text-transform: uppercase; color: #6EE7B7; font-weight: 600;">Excels Comerciales</div>
+              <div style="font-size: 11px; text-transform: uppercase; color: #B4D0C5; font-weight: 600;">Libros comerciales</div>
               <div style="font-size: 18px; font-weight: 700; margin: 2px 0;" class="num-mono" id="island-excel-count">—</div>
               <div style="font-size: 11px; color: #CBD5E1;"><span id="island-excel-status">Pendiente de Excels</span></div>
               <div style="margin-top: 4px; font-size: 10px; color: #34D399;" id="island-excel-money">Facturado: $0.00</div>
@@ -2859,11 +3210,7 @@
           <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <!-- ZONA DEDICADA: Base de Leads CRM -->
             <div style="display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15);">
-              <span style="font-size: 11px; color: #CBD5E1; font-weight: 600;">Corte CRM:</span>
-              <div class="segmented-switch switch-window-period" id="switch-window-period-mkt" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2);">
-                <div class="switch-option" data-window="1m" id="mkt-opt-window-1m" style="padding: 2px 8px; font-size: 11px;">1 Mes</div>
-                <div class="switch-option active" data-window="3m" id="mkt-opt-window-3m" style="padding: 2px 8px; font-size: 11px;">3 Meses</div>
-              </div>
+              <span style="font-size: 11px; color: #CBD5E1; font-weight: 600;" id="marketing-crm-date-range">Rango de contactos CRM</span>
             </div>
             <div class="status-badge active" id="badge-marketing-crm-state">
               <svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;"><polyline points="20 6 9 17 4 12"/></svg>
@@ -3702,6 +4049,43 @@
            PESTAÑA: VENTA CRUZADA MULTIMARCA (FÉNIX ➔ MAKI ➔ SOLINTHA)
            ==================================================================== -->
       <section class="tab-pane" id="tab-cross">
+        <div class="tab-visual-grid" id="cross-overview">
+          <article class="visual-summary-card">
+            <h3>Oportunidades multimarca</h3>
+            <p>Registros de Excel con venta cruzada detectada</p>
+            <div class="cross-metric-value num-mono" id="cross-overview-count">0</div>
+            <div class="cross-metric-caption">oportunidades</div>
+          </article>
+          <article class="visual-summary-card">
+            <h3>Valor cotizado</h3>
+            <p>Importe total de las oportunidades cruzadas</p>
+            <div class="cross-metric-value num-mono" id="cross-overview-amount">$0.00</div>
+            <div class="cross-metric-caption" id="cross-overview-ticket">Ticket medio: $0.00</div>
+          </article>
+          <article class="visual-summary-card">
+            <h3>Cierres ganados</h3>
+            <p>Conversión de las oportunidades cruzadas</p>
+            <div class="cross-metric-value num-mono" id="cross-overview-won">0%</div>
+            <div class="cross-metric-caption" id="cross-overview-won-detail">0 cierres ganados</div>
+          </article>
+          <article class="visual-summary-card" style="grid-column: span 2;">
+            <h3>Ruta de venta cruzada</h3>
+            <p>Oportunidad de una división que incluye productos complementarios</p>
+            <div class="cross-flow-track" aria-label="Asesor comercial, oportunidad, producto complementario">
+              <span class="cross-flow-node primary">Asesor</span><span class="cross-flow-link"></span>
+              <span class="cross-flow-node">Oportunidad</span><span class="cross-flow-link"></span>
+              <span class="cross-flow-node secondary">Producto<br>complementario</span>
+            </div>
+          </article>
+          <article class="visual-summary-card">
+            <h3>Productos con más cruces</h3>
+            <p>Frecuencia dentro de las oportunidades filtradas</p>
+            <div class="visual-rank-bars" id="cross-overview-products">
+              <span class="cross-metric-caption">Carga los archivos Excel para ver el ranking.</span>
+            </div>
+          </article>
+        </div>
+
         <div class="card" style="margin-bottom: 24px;">
           <div class="card-header">
             <div class="card-title-group">
@@ -3734,7 +4118,7 @@
 
 <section class="tab-pane" id="tab-detail">
         <!-- Bloque 1: Matriz Cruzada Dinámica (Pivot Table) -->
-        <div class="card">
+        <div class="card table-last-section">
           <div class="card-header">
             <div class="card-title-group">
               <div class="card-icon-box"><svg viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></div>
@@ -4265,7 +4649,7 @@
         filteredOpportunities: [],   // Oportunidades tras aplicar filtros globales
         crmContacts: [],             // Índice CRM en memoria para importaciones por separado
         activeTab: 'tab-executive',  // Pestaña actualmente visible (Portada ejecutiva por defecto)
-        windowPeriod: '3m',          // '1m' (375) | '3m' (1,774)
+        crmDateRange: { start: '', end: '' },
         fiscalMode: 'iva',           // 'iva' | 'neto'
         auditMode: 'clean',          // 'clean' (393) | 'raw' (438)
         goalCommercial: 60000.0,     // Meta mensual configurable en pantalla
@@ -4365,6 +4749,91 @@
         return Number(num).toLocaleString('en-US');
       }
 
+      function getCrmContactDate(contact) {
+        const value = contact?.creado_iso || contact?.created_iso || contact?.created_at ||
+          contact?.created || contact?.date_created || contact?.fecha_creacion;
+        if (value === null || value === undefined || value === '') return '';
+        if (typeof value === 'number' || /^\d{10,13}$/.test(String(value))) {
+          const numericDate = Number(value);
+          const timestamp = String(value).length === 10 ? numericDate * 1000 : numericDate;
+          const parsed = new Date(timestamp);
+          return isNaN(parsed.getTime()) ? '' : parsed.toISOString().slice(0, 10);
+        }
+        const text = String(value).trim();
+        const isoDate = text.match(/^(\d{4}-\d{2}-\d{2})/);
+        if (isoDate) return isoDate[1];
+        const parsed = new Date(text);
+        return isNaN(parsed.getTime()) ? '' : parsed.toISOString().slice(0, 10);
+      }
+
+      function updateCrmDateRange(resetRange = false) {
+        const startInput = document.getElementById('input-clientify-date-start');
+        const endInput = document.getElementById('input-clientify-date-end');
+        const summary = document.getElementById('clientify-range-summary');
+        const countLabel = document.getElementById('clientify-range-count');
+        const detailLabel = document.getElementById('clientify-range-detail');
+        const contacts = state.crmContacts || [];
+        const datedContacts = contacts
+          .map(contact => ({ contact, date: getCrmContactDate(contact) }))
+          .filter(item => item.date)
+          .sort((left, right) => left.date.localeCompare(right.date));
+        const minimumDate = datedContacts[0]?.date || '';
+        const maximumDate = datedContacts[datedContacts.length - 1]?.date || '';
+
+        if (startInput && endInput) {
+          const rangeIsUnset = !state.crmDateRange.start || !state.crmDateRange.end;
+          const currentRangeOutsideData = minimumDate && maximumDate &&
+            (state.crmDateRange.start < minimumDate || state.crmDateRange.end > maximumDate);
+          if (resetRange || rangeIsUnset || currentRangeOutsideData) {
+            state.crmDateRange.start = minimumDate;
+            state.crmDateRange.end = maximumDate;
+          }
+          startInput.disabled = !datedContacts.length;
+          endInput.disabled = !datedContacts.length;
+          startInput.min = minimumDate;
+          startInput.max = maximumDate;
+          endInput.min = minimumDate;
+          endInput.max = maximumDate;
+          startInput.value = state.crmDateRange.start;
+          endInput.value = state.crmDateRange.end;
+        }
+
+        const start = startInput?.value || state.crmDateRange.start;
+        const end = endInput?.value || state.crmDateRange.end;
+        const validRange = !datedContacts.length || Boolean(start && end && start <= end);
+        const matchedContacts = datedContacts.filter(item =>
+          validRange && item.date >= start && item.date <= end
+        );
+        const undatedCount = contacts.length - datedContacts.length;
+        const metadataCount = Number(state.rawData?.metadata?.total_contactos_crm || 0);
+        const count = datedContacts.length ? matchedContacts.length : metadataCount;
+
+        if (countLabel) countLabel.textContent = formatInteger(validRange ? count : 0);
+        if (summary) summary.classList.toggle('is-invalid', !validRange);
+        if (detailLabel) {
+          if (!validRange) {
+            detailLabel.textContent = 'La fecha inicial debe ser anterior a la final';
+          } else if (datedContacts.length) {
+            detailLabel.textContent = `${start} → ${end}${undatedCount ? ` · ${undatedCount} sin fecha` : ''}`;
+          } else if (metadataCount) {
+            detailLabel.textContent = 'Solo hay un total agregado, sin fechas individuales';
+          } else {
+            detailLabel.textContent = 'Importa un JSON con fecha de creación para filtrar';
+          }
+        }
+
+        return {
+          hasCrm: datedContacts.length > 0 || metadataCount > 0 || contacts.length > 0,
+          total: Math.max(metadataCount, contacts.length),
+          count: validRange ? count : 0,
+          datedCount: datedContacts.length,
+          undatedCount,
+          start,
+          end,
+          validRange
+        };
+      }
+
       function showToast(message, type = 'info') {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
@@ -4430,6 +4899,19 @@
       function applyLoadedData(dataset) {
         state.rawData = dataset;
         state.allOpportunities = dataset.data_oportunidades || [];
+        const crmContactMap = new Map();
+        state.allOpportunities.forEach(opportunity => {
+          const contact = opportunity.crm_contacto;
+          if (contact && typeof contact === 'object') {
+            const key = String(contact.id || opportunity.clientify_id || contact.nombre_completo || contact.empresa || '');
+            if (key) crmContactMap.set(key, contact);
+          }
+        });
+        state.crmContacts = Array.isArray(dataset.crm_contacts)
+          ? dataset.crm_contacts
+          : Array.from(crmContactMap.values());
+        state.crmDateRange = { start: '', end: '' };
+        updateCrmDateRange(true);
 
         // Metadatos
         const meta = dataset.metadata || {};
@@ -5024,8 +5506,6 @@
           const crmByName = {};
           let totalCrmContacts = 0;
           let crmStateCounts = {};
-          let crmDates = [];
-          let crm1mCount = 0;
           let crmReadErrors = 0;
 
           if (crmFiles.length > 0) {
@@ -5111,10 +5591,6 @@
                       else if (rawSt.includes('cliente')) stNorm = 'Cliente';
                       crmStateCounts[stNorm] = (crmStateCounts[stNorm] || 0) + 1;
 
-                      if (created) {
-                        const d = new Date(created);
-                        if (!isNaN(d.getTime())) crmDates.push(d.getTime());
-                      }
                     }
 
                     phoneCols.forEach(pc => {
@@ -5138,16 +5614,6 @@
               }
             }
 
-            if (crmDates.length > 0) {
-              const maxD = Math.max(...crmDates);
-              const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-              crm1mCount = crmDates.filter(t => (maxD - t) <= thirtyDaysMs).length;
-            }
-            if (crm1mCount === 0 && totalCrmContacts > 0) {
-              crm1mCount = Math.round(totalCrmContacts * 0.21);
-            }
-
-            state.crmContacts = Object.values(crmById);
             if (totalCrmContacts > 0) {
               this.log(`Clientify CRM indexado: ${totalCrmContacts} contactos consolidados en memoria.`, 'success');
             } else if (crmReadErrors === 0) {
@@ -5174,17 +5640,8 @@
                 : status.includes('CLIENTE') ? 'Cliente'
                 : 'Otro';
               crmStateCounts[stateName] = (crmStateCounts[stateName] || 0) + 1;
-              if (contact.creado_iso) {
-                const createdAt = new Date(contact.creado_iso);
-                if (!isNaN(createdAt.getTime())) crmDates.push(createdAt.getTime());
-              }
             });
             totalCrmContacts = state.crmContacts.length;
-            if (crmDates.length > 0) {
-              const maxDate = Math.max(...crmDates);
-              crm1mCount = crmDates.filter(time => (maxDate - time) <= 30 * 24 * 60 * 60 * 1000).length;
-            }
-            if (crm1mCount === 0 && totalCrmContacts > 0) crm1mCount = Math.round(totalCrmContacts * 0.21);
             this.log(`Usando índice Clientify en memoria (${totalCrmContacts} contactos).`, 'info');
           } else if (state.rawData && state.rawData.metadata && state.rawData.metadata.total_contactos_crm) {
             totalCrmContacts = state.rawData.metadata.total_contactos_crm;
@@ -5194,6 +5651,11 @@
           if (options.clientifyOnly && crmReadErrors === crmFiles.length) {
             showToast('No se pudo leer el archivo JSON de Clientify. Revisa el registro de procesamiento.', 'error');
             return;
+          }
+
+          if (crmFiles.length > 0 && totalCrmContacts > 0) {
+            state.crmContacts = Object.values(crmById);
+            updateCrmDateRange(true);
           }
 
           if (advisorFiles.length === 0 && crmFiles.length > 0 && state.allOpportunities.length > 0) {
@@ -5245,11 +5707,13 @@
                 directorio_origen: folderName || 'Clientify CRM',
                 cruce_clientify_activo: totalCrmContacts > 0,
                 total_contactos_crm: totalCrmContacts,
-                contactos_crm_1m: crm1mCount,
-                contactos_crm_3m: totalCrmContacts,
+                contactos_crm_en_rango: updateCrmDateRange().count,
+                rango_crm_desde: state.crmDateRange.start,
+                rango_crm_hasta: state.crmDateRange.end,
                 estados_crm: crmStateCounts,
                 total_oportunidades_cruzadas: updatedOpportunities.filter(opportunity => opportunity.crm_contacto).length
               },
+              crm_contacts: state.crmContacts,
               data_oportunidades: updatedOpportunities
             };
 
@@ -5910,14 +6374,16 @@
               iva_aplicado: 0.15,
               cruce_clientify_activo: totalCrmContacts > 0,
               total_contactos_crm: totalCrmContacts,
-              contactos_crm_1m: crm1mCount || (state.rawData?.metadata?.contactos_crm_1m || 0),
-              contactos_crm_3m: totalCrmContacts || (state.rawData?.metadata?.contactos_crm_3m || 0),
+              contactos_crm_en_rango: updateCrmDateRange().count,
+              rango_crm_desde: state.crmDateRange.start,
+              rango_crm_hasta: state.crmDateRange.end,
               estados_crm: Object.keys(crmStateCounts).length > 0 ? crmStateCounts : (state.rawData?.metadata?.estados_crm || {}),
               total_oportunidades_cruzadas: registrosCrudos.filter(r => r.crm_contacto).length
             },
             resumen_por_archivo: resumenPorArchivo,
             catalogos: catalogosConsolidados,
             metas_configuradas: metasConfiguradas,
+            crm_contacts: state.crmContacts,
             data_oportunidades: registrosCrudos
           };
 
@@ -6450,30 +6916,21 @@
       // 2. RENDERIZADO DE PORTADA EJECUTIVA (TAB-EXECUTIVE)
       // ======================================================================
       function renderTabExecutive() {
-        // 1. Inicializar o actualizar 3D
-        if (!threeRenderer) {
-          initThreeSourceIslands();
-        }
-
         const meta = state.rawData?.metadata || {};
-        const hasCrm = Boolean(meta.cruce_clientify_activo && meta.total_contactos_crm > 0);
-        const crm1m = meta.contactos_crm_1m || (hasCrm ? Math.round(meta.total_contactos_crm * 0.21) : 0);
-        const crm3m = meta.contactos_crm_3m || meta.total_contactos_crm || 0;
-        const is1m = (state.windowPeriod === '1m');
-        const activeCrmCount = is1m ? crm1m : crm3m;
-        const crmWinLabel = is1m ? '1 mes' : '3 meses';
-
-        // Actualizar switch documental
-        const opt1m = document.getElementById('exec-opt-window-1m');
-        const opt3m = document.getElementById('exec-opt-window-3m');
-        if (opt1m) opt1m.textContent = hasCrm ? `1 Mes (${crm1m.toLocaleString()})` : '1 Mes';
-        if (opt3m) opt3m.textContent = hasCrm ? `3 Meses (${crm3m.toLocaleString()})` : '3 Meses';
+        const crmRange = updateCrmDateRange();
+        const hasCrm = crmRange.hasCrm;
+        const activeCrmCount = crmRange.count;
+        const crmWinLabel = crmRange.start && crmRange.end
+          ? `${crmRange.start} → ${crmRange.end}`
+          : 'Rango CRM disponible';
 
         // Isla 1: Clientify CRM
         const elCliCount = document.getElementById('island-clientify-count');
         const elCliWin = document.getElementById('island-clientify-window');
-        if (elCliCount) elCliCount.textContent = hasCrm ? `${activeCrmCount.toLocaleString()} Leads` : 'Sin Cargar';
-        if (elCliWin) elCliWin.textContent = hasCrm ? `Clientify CRM · ${crmWinLabel}` : 'Pendiente';
+        if (elCliCount) elCliCount.textContent = hasCrm ? `${formatInteger(activeCrmCount)} Leads` : 'Sin Cargar';
+        if (elCliWin) elCliWin.textContent = hasCrm
+          ? `${formatInteger(crmRange.total)} totales · ${crmWinLabel}`
+          : 'Pendiente';
 
         const elKpiWon = document.getElementById('exec-kpi-won-total');
         const elKpiWonSub = document.getElementById('exec-kpi-won-sub');
@@ -6493,6 +6950,7 @@
         const elExMoney = document.getElementById('island-excel-money');
         const elSepText = document.getElementById('island-separation-text');
         const elSepBadge = document.getElementById('island-separation-badge');
+        const sourceFlow = document.getElementById('source-flow-illustration');
 
         const totalWonMoney = allClean.filter(o => o.etapa === 'Cliente Ganado').reduce((acc, o) => acc + (state.fiscalMode === 'iva' ? o.monto_iva : o.monto_neto), 0);
         const totalWonCount = allClean.filter(o => o.etapa === 'Cliente Ganado').length;
@@ -6552,9 +7010,13 @@
           if (cruzadasCount > 0) {
             if (elSepText) elSepText.textContent = `Conciliado: ${cruzadasCount} oportunidades enlazadas con CRM`;
             if (elSepBadge) elSepBadge.className = 'island-gap-pill conciliated';
+            if (sourceFlow) sourceFlow.classList.add('is-conciliated');
           } else {
-            if (elSepText) elSepText.textContent = `Sin conciliación a nivel de registro`;
+            if (elSepText) elSepText.textContent = hasCrm
+              ? 'Fuentes cargadas · sin coincidencias registradas'
+              : 'Importa las fuentes para iniciar la conciliación';
             if (elSepBadge) elSepBadge.className = 'island-gap-pill';
+            if (sourceFlow) sourceFlow.classList.remove('is-conciliated');
           }
 
           document.getElementById('cover-sales-loaded-content').style.display = 'block';
@@ -6572,6 +7034,7 @@
           if (elExMoney) elExMoney.textContent = 'Haga click para cargar';
           if (elSepText) elSepText.textContent = 'Sin conciliación';
           if (elSepBadge) elSepBadge.className = 'island-gap-pill';
+          if (sourceFlow) sourceFlow.classList.remove('is-conciliated');
 
           document.getElementById('cover-sales-loaded-content').style.display = 'none';
           document.getElementById('cover-sales-unloaded-placeholder').style.display = 'block';
@@ -6806,21 +7269,18 @@
           ? state.filteredOpportunities.filter(o => !o.es_duplicado)
           : state.filteredOpportunities;
 
-        const meta = state.rawData?.metadata || {};
-        const hasCrm = Boolean(meta.cruce_clientify_activo && meta.total_contactos_crm > 0);
-        const crm1m = meta.contactos_crm_1m || (hasCrm ? Math.round(meta.total_contactos_crm * 0.21) : 0);
-        const crm3m = meta.contactos_crm_3m || meta.total_contactos_crm || 0;
-        const totalCrm = hasCrm
-          ? (state.windowPeriod === '1m' ? crm1m : crm3m)
-          : 0;
-
-        const optMkt1m = document.getElementById('mkt-opt-window-1m');
-        const optMkt3m = document.getElementById('mkt-opt-window-3m');
-        if (optMkt1m) optMkt1m.textContent = hasCrm ? `1 Mes (${crm1m.toLocaleString()})` : '1 Mes';
-        if (optMkt3m) optMkt3m.textContent = hasCrm ? `3 Meses (${crm3m.toLocaleString()})` : '3 Meses';
+        const crmRange = updateCrmDateRange();
+        const hasCrm = crmRange.hasCrm;
+        const totalCrm = crmRange.count;
 
         const elTotalCrm = document.getElementById('lbl-marketing-total-leads');
-        if (elTotalCrm) elTotalCrm.textContent = hasCrm ? `${totalCrm.toLocaleString()} Contactos Indexados (${state.windowPeriod === '1m' ? '1 Mes' : '3 Meses'})` : 'Sin Archivo CRM';
+        if (elTotalCrm) elTotalCrm.textContent = hasCrm
+          ? `${formatInteger(totalCrm)} Contactos en el rango`
+          : 'Sin Archivo CRM';
+        const rangeLabel = document.getElementById('marketing-crm-date-range');
+        if (rangeLabel) rangeLabel.textContent = crmRange.start && crmRange.end
+          ? `${crmRange.start} → ${crmRange.end}`
+          : 'Elige un rango en Resumen Ejecutivo';
 
         const badgeCrm = document.getElementById('badge-marketing-crm-state');
         if (badgeCrm) {
@@ -7398,6 +7858,65 @@
       // ======================================================================
       // 4. RENDERIZADO DE VENTA CRUZADA (TAB-CROSS)
       // ======================================================================
+      function renderCrossOverview(crossOps) {
+        const isIva = state.fiscalMode === 'iva';
+        const amountFor = operation => isIva ? operation.monto_iva : operation.monto_neto;
+        const totalAmount = crossOps.reduce((sum, operation) => sum + (amountFor(operation) || 0), 0);
+        const wonOps = crossOps.filter(operation => operation.etapa === 'Cliente Ganado');
+        const wonRate = crossOps.length ? (wonOps.length / crossOps.length) * 100 : 0;
+        const count = document.getElementById('cross-overview-count');
+        const amount = document.getElementById('cross-overview-amount');
+        const ticket = document.getElementById('cross-overview-ticket');
+        const won = document.getElementById('cross-overview-won');
+        const wonDetail = document.getElementById('cross-overview-won-detail');
+        const productList = document.getElementById('cross-overview-products');
+
+        if (count) count.textContent = formatInteger(crossOps.length);
+        if (amount) amount.textContent = formatMoney(totalAmount);
+        if (ticket) ticket.textContent = `Ticket medio: ${formatMoney(crossOps.length ? totalAmount / crossOps.length : 0)}`;
+        if (won) won.textContent = `${wonRate.toFixed(1)}%`;
+        if (wonDetail) wonDetail.textContent = `${formatInteger(wonOps.length)} ${wonOps.length === 1 ? 'cierre ganado' : 'cierres ganados'}`;
+        if (!productList) return;
+
+        const productCounts = new Map();
+        crossOps.forEach(operation => {
+          const product = operation.producto_maki || operation.producto_adicional ||
+            operation.producto_principal || 'Producto no identificado';
+          productCounts.set(product, (productCounts.get(product) || 0) + 1);
+        });
+        const ranking = Array.from(productCounts.entries())
+          .sort((left, right) => right[1] - left[1])
+          .slice(0, 4);
+        const maximum = ranking[0]?.[1] || 1;
+        productList.replaceChildren();
+
+        if (!ranking.length) {
+          const empty = document.createElement('span');
+          empty.className = 'cross-metric-caption';
+          empty.textContent = 'No hay productos cruzados en la selección.';
+          productList.appendChild(empty);
+          return;
+        }
+
+        ranking.forEach(([product, quantity]) => {
+          const row = document.createElement('div');
+          row.className = 'visual-rank-row';
+          const label = document.createElement('span');
+          label.textContent = product;
+          label.title = product;
+          const track = document.createElement('div');
+          track.className = 'visual-rank-track';
+          const fill = document.createElement('div');
+          fill.className = 'visual-rank-fill';
+          fill.style.width = `${(quantity / maximum) * 100}%`;
+          track.appendChild(fill);
+          const value = document.createElement('strong');
+          value.textContent = formatInteger(quantity);
+          row.append(label, track, value);
+          productList.appendChild(row);
+        });
+      }
+
       function renderTabCross() {
         const tbody = document.getElementById('tbody-cross-selling-dedicated');
         if (!tbody) return;
@@ -7407,6 +7926,7 @@
           ? state.filteredOpportunities.filter(o => !o.es_duplicado)
           : state.filteredOpportunities;
         const crossOps = src.filter(o => o.es_venta_cruzada === true);
+        renderCrossOverview(crossOps);
         const elBadge = document.getElementById('lbl-cross-count-badge');
         if (elBadge) {
           elBadge.textContent = state.filters.week !== 'all'
@@ -9342,16 +9862,42 @@
           document.querySelectorAll(sel).forEach(el => el.addEventListener(evt, () => fn(el)));
         };
 
-        // Selectores de Ventana Temporal CRM (Sincronizados en su zona dedicada)
-        document.querySelectorAll('.switch-window-period .switch-option').forEach(opt => {
-          opt.addEventListener('click', () => {
-            const targetWin = opt.getAttribute('data-window');
-            state.windowPeriod = targetWin;
-            document.querySelectorAll('.switch-window-period .switch-option').forEach(o => {
-              if (o.getAttribute('data-window') === targetWin) o.classList.add('active');
-              else o.classList.remove('active');
-            });
-            renderActiveTab();
+        const detailTab = document.getElementById('tab-detail');
+        const crossChartCard = document.getElementById('box-cross-chart')?.closest('.card');
+        const pivotCard = document.getElementById('table-pivot-matrix')?.closest('.card');
+        const masterTableCard = document.getElementById('table-master-ops')?.closest('.card');
+        if (detailTab) {
+          if (crossChartCard) detailTab.appendChild(crossChartCard);
+          if (pivotCard) {
+            pivotCard.classList.add('table-last-section');
+            detailTab.appendChild(pivotCard);
+          }
+          if (masterTableCard) {
+            masterTableCard.classList.add('table-last-section');
+            detailTab.appendChild(masterTableCard);
+          }
+        }
+
+        const pipelineTab = document.getElementById('tab-pipeline');
+        const cycleTraceCard = document.getElementById('table-cycle-traceability')?.closest('.card');
+        if (pipelineTab && cycleTraceCard) {
+          cycleTraceCard.classList.add('table-last-section');
+          pipelineTab.appendChild(cycleTraceCard);
+        }
+
+        const auditTab = document.getElementById('tab-audit');
+        const duplicateTableCard = document.getElementById('tbody-duplicates-list')?.closest('.card');
+        if (auditTab && duplicateTableCard) {
+          duplicateTableCard.classList.add('table-last-section');
+          auditTab.appendChild(duplicateTableCard);
+        }
+
+        ['input-clientify-date-start', 'input-clientify-date-end'].forEach(id => {
+          safeOn(id, 'change', (event) => {
+            state.crmDateRange[id.endsWith('start') ? 'start' : 'end'] = event.target.value;
+            updateCrmDateRange();
+            renderTabExecutive();
+            if (state.activeTab === 'tab-marketing') renderTabMarketing();
           });
         });
 
