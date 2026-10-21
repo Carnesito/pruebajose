@@ -2775,9 +2775,10 @@
       min-height: 0;
       grid-column: 1 / -1;
       grid-row: 2;
-      grid-template-columns: 1fr minmax(190px, 0.75fr) 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(190px, 0.75fr) minmax(0, 1fr);
       align-items: center;
-      gap: 6%;
+      gap: clamp(12px, 2.5vw, 32px);
+      padding: 0 8px;
       overflow: visible;
       border: 0;
       border-radius: 0;
@@ -2883,7 +2884,7 @@
       cursor: pointer;
       font-family: var(--font-sans);
       text-align: left;
-      transform: perspective(780px) rotateY(4deg) rotateX(2deg) translateZ(20px);
+      transform: translateZ(0);
       transform-style: preserve-3d;
       transition: transform 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease;
     }
@@ -2905,18 +2906,18 @@
       outline: none;
       border-color: rgba(224, 192, 157, 0.72);
       box-shadow: 0 22px 32px rgba(5, 16, 27, 0.42), 0 0 28px rgba(214, 167, 124, 0.12);
-      transform: perspective(780px) rotateY(4deg) rotateX(0) translateY(-5px) translateZ(35px);
+      transform: translateY(-4px);
     }
 
     .source-node-excel {
       border-color: rgba(151, 190, 168, 0.32);
       background: linear-gradient(145deg, rgba(68, 111, 99, 0.94), rgba(27, 61, 57, 0.96));
-      transform: perspective(780px) rotateY(-4deg) rotateX(2deg) translateZ(20px);
+      transform: translateZ(0);
     }
 
     .source-node-excel:hover,
     .source-node-excel:focus-visible {
-      transform: perspective(780px) rotateY(-4deg) rotateX(0) translateY(-5px) translateZ(35px);
+      transform: translateY(-4px);
     }
 
     .source-node-icon {
