@@ -5622,6 +5622,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         // Instancias de Chart.js para evitar fugas de memoria
         charts: {}
       };
+      window.state = state;
+      window.applyFilters = applyFilters;
 
       // ======================================================================
       // UTILIDADES MATEMÁTICAS Y DE FORMATEO
@@ -5796,19 +5798,44 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       }
       function enrichOpportunityWithCrm(op,index) {
         const match=matchCrmOpportunity(op,index);
-        const attribution=window.resolveMetaAdDetails(match.contact,op.marca);
-        attribution.atribucion_identificada=attribution.atribucion_confirmada;
-        attribution.atribucion_estado=attribution.atribucion_confirmada?'Campaña identificada con cruce de confianza alta':'Sin campaña confirmada';
-        if(match.confidence==='Media' && attribution.atribucion_confirmada){
-          attribution.atribucion_confirmada=false;
-          attribution.atribucion_estado='Campaña candidata · validar coincidencia por nombre';
+        const contactToResolve = match.contact || op.crm_contacto || (op.etiquetas ? op : null);
+        const attribution = window.resolveMetaAdDetails(contactToResolve, op.marca);
+        attribution.atribucion_identificada = attribution.atribucion_confirmada;
+        attribution.atribucion_estado = attribution.atribucion_confirmada ? 'Campaña identificada con cruce de confianza alta' : 'Sin campaña confirmada';
+        if (match.confidence === 'Media' && attribution.atribucion_confirmada) {
+          attribution.atribucion_confirmada = false;
+          attribution.atribucion_estado = 'Campaña candidata · validar coincidencia por nombre';
         }
-        if(!match.contact)attribution.canal_entrada=op.origen?`Libro del asesor · ${escapeHtml(op.origen)}`:'Origen no registrado';
-        const alerts=(op.alerta_calidad || []).filter(text=>!String(text).startsWith('Cruce CRM:'));
-        if(match.warning)alerts.push('Cruce CRM: '+match.warning);
-        if(match.confidence==='Media')alerts.push('Cruce CRM: coincidencia por nombre único; revisar identidad si se requiere confirmación documental.');
-        if(attribution.atribucion_alerta)alerts.push('Cruce CRM: '+attribution.atribucion_alerta);
-        return {...op,...attribution,crm_contacto:match.contact?{...match.contact}:null,metodo_cruce:match.method,cruce_estado:match.status,cruce_confianza:match.confidence,cruce_candidatos:match.candidates,crm_contact_id:match.contact?.id || null,referencia_crm_tipo:match.reference.type,referencia_crm_id:match.reference.id,alerta_calidad:alerts};
+        if (!contactToResolve) attribution.canal_entrada = op.origen ? `Libro del asesor · ${escapeHtml(op.origen)}` : 'Origen no registrado';
+        const alerts = (op.alerta_calidad || []).filter(text => !String(text).startsWith('Cruce CRM:'));
+        if (match.warning) alerts.push('Cruce CRM: ' + match.warning);
+        if (match.confidence === 'Media') alerts.push('Cruce CRM: coincidencia por nombre único; revisar identidad si se requiere confirmación documental.');
+        if (attribution.atribucion_alerta) alerts.push('Cruce CRM: ' + attribution.atribucion_alerta);
+
+        const finalCampanaId = attribution.campana_id || op.campana_id || null;
+        const finalCampanaNombre = (attribution.campana_nombre && attribution.campana_nombre !== 'Sin campaña identificada' && attribution.campana_nombre !== 'Sin atribución CRM') ? attribution.campana_nombre : (op.campana_nombre || attribution.campana_nombre);
+        const finalAnuncioId = attribution.anuncio_id || op.anuncio_id || null;
+        const finalAnuncioNombre = (attribution.anuncio_nombre && attribution.anuncio_nombre !== 'Sin anuncio identificado') ? attribution.anuncio_nombre : (op.anuncio_nombre || attribution.anuncio_nombre);
+        const finalAtribConfirmada = attribution.atribucion_confirmada || Boolean(op.atribucion_confirmada);
+
+        return {
+          ...op,
+          ...attribution,
+          campana_id: finalCampanaId,
+          campana_nombre: finalCampanaNombre,
+          anuncio_id: finalAnuncioId,
+          anuncio_nombre: finalAnuncioNombre,
+          atribucion_confirmada: finalAtribConfirmada,
+          crm_contacto: match.contact ? { ...match.contact } : (op.crm_contacto ? { ...op.crm_contacto } : null),
+          metodo_cruce: match.method || (op.crm_contacto ? 'Cruce previo' : 'Sin cruce'),
+          cruce_estado: match.status || (op.crm_contacto ? 'Conciliado' : 'Sin coincidencia'),
+          cruce_confianza: match.confidence || (op.crm_contacto ? 'Alta' : 'Sin cruce'),
+          cruce_candidatos: match.candidates,
+          crm_contact_id: match.contact?.id || op.crm_contacto?.id || null,
+          referencia_crm_tipo: match.reference?.type,
+          referencia_crm_id: match.reference?.id,
+          alerta_calidad: alerts
+        };
       }
       function visibleAuditMatches() {
         const ops=state.filteredOpportunities;
@@ -5976,9 +6003,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         showToast('Bienvenido: No hay datos previos precargados. Use "📁 Procesar Carpeta / Excels" para escanear sus libros.');
       }
 
+      window.applyLoadedData = applyLoadedData;
       function applyLoadedData(dataset) {
-        if(dataset.catalogo_campanas){
-          try {setCampaignCatalog(dataset.catalogo_campanas);} catch(error){showToast('Catálogo rechazado: '+error.message,'error');return;}
+        if(dataset.catalogo_campanas && typeof dataset.catalogo_campanas === 'object' && Object.keys(dataset.catalogo_campanas).length > 0){
+          try {setCampaignCatalog(dataset.catalogo_campanas);} catch(error){console.warn('Catálogo en dataset omitido:', error.message);}
         }
         dataset.catalogo_campanas=window.META_ADS_CATALOG;
         state.rawData = dataset;
@@ -6078,101 +6106,391 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
       // CATÁLOGO MAESTRO META ADS & ATRIBUCIÓN COMERCIAL (SOLINTHA, MAKI, FÉNIX)
       // ======================================================================
+      window.BASE_META_ADS_CATALOG = {
+        "120252024123470460": {
+          campana_id: "120252024123470460",
+          nombre_campana: "Ventas | Equipos TPV | Solintha",
+          marca: "SOLINTHA",
+          anuncios: {
+            "120252024813550460": { anuncio_id: "120252024813550460", nombre: "Ventas | Equipos TPV | 1P | WA - Copia", entrega: "Sin verificar" },
+            "120255300052550460": { anuncio_id: "120255300052550460", nombre: "Ventas | Equipos TPV | COMBO 2", entrega: "Sin verificar" },
+            "120255300084020460": { anuncio_id: "120255300084020460", nombre: "Ventas | Equipos TPV | COMBO 3", entrega: "Sin verificar" },
+            "120255300033340460": { anuncio_id: "120255300033340460", nombre: "Ventas | Equipos TPV | COMBO 1", entrega: "Sin verificar" }
+          }
+        },
+        "120247645471140248": {
+          campana_id: "120247645471140248",
+          nombre_campana: "Ventas | TPV Equipo | Maki",
+          marca: "MAKI",
+          anuncios: {
+            "120253269761360248": { anuncio_id: "120253269761360248", nombre: "Ventas | TPV Equipo | AON POS", entrega: "Sin verificar" },
+            "120253269809840248": { anuncio_id: "120253269809840248", nombre: "Ventas | TPV Equipo | SWAN 2", entrega: "Sin verificar" },
+            "120250097531020248": { anuncio_id: "120250097531020248", nombre: "Ventas | TPV Equipo | Swift 2 pro", entrega: "Sin verificar" }
+          }
+        },
+        "120246282333630248": {
+          campana_id: "120246282333630248",
+          nombre_campana: "Ventas | Maki Rest | WA",
+          marca: "MAKI",
+          anuncios: {
+            "120248324009380248": { anuncio_id: "120248324009380248", nombre: "Ventas | Maki Rest | WA | Caja", entrega: "Sin verificar" },
+            "120248325025310248": { anuncio_id: "120248325025310248", nombre: "Ventas | Maki Rest | WA | Restaurante", entrega: "Sin verificar" },
+            "120246282333620248": { anuncio_id: "120246282333620248", nombre: "Ventas | Maki Rest | WA", entrega: "Sin verificar" }
+          }
+        },
+        "52545443650256": {
+          campana_id: "52545443650256",
+          nombre_campana: "CP | Costos Producción",
+          marca: "FENIX",
+          anuncios: {
+            "52545443651256": { anuncio_id: "52545443651256", nombre: "CP | C. Producc. | Avicola", entrega: "Activa" },
+            "52545443650656": { anuncio_id: "52545443650656", nombre: "CP | C. Producc. | Textil", entrega: "Activa" }
+          }
+        },
+        "6305169058452": {
+          campana_id: "6305169058452",
+          nombre_campana: "Clientes Potenciales",
+          marca: "FENIX",
+          anuncios: {
+            "6889641490452": { anuncio_id: "6889641490452", nombre: "Nuevo anuncio de Clientes potenciales", entrega: "Activa" }
+          }
+        },
+        "6776551286652": {
+          campana_id: "6776551286652",
+          nombre_campana: "CP | SCC TPV",
+          marca: "FENIX",
+          anuncios: {
+            "6778003608052": { anuncio_id: "6778003608052", nombre: "CP | SCC TPV | Img individual", entrega: "Activa" },
+            "6776551287452": { anuncio_id: "6776551287452", nombre: "CP | SCC TPV | Carrusel", entrega: "Activa" }
+          }
+        },
+        "6955517682852": {
+          campana_id: "6955517682852",
+          nombre_campana: "Ventas | Sis G VD",
+          marca: "FENIX",
+          anuncios: {
+            "52559769023256": { anuncio_id: "52559769023256", nombre: "Ventas | Sis G VD | WA - Advantage2", entrega: "Activa" },
+            "52559769023456": { anuncio_id: "52559769023456", nombre: "Ventas | Sis G VD | WA- Advantage1", entrega: "Activa" }
+          }
+        },
+        "6935235075252": {
+          campana_id: "6935235075252",
+          nombre_campana: "Interacción | Etp 2 Cons.",
+          marca: "FENIX",
+          anuncios: {
+            "52542283315856": { anuncio_id: "52542283315856", nombre: "Interacción | Etp 2 Cons. | WA | Llegar lejos", entrega: "Activa" },
+            "52542283964656": { anuncio_id: "52542283964656", nombre: "Interacción | Etp 2 Cons. | WA | El control no...", entrega: "Activa" }
+          }
+        }
+      };
       window.META_ADS_CATALOG = {};
       window.META_ADS_BY_AD_ID = {};
-      function setCampaignCatalog(catalog) {
-        const next={},byAd={};
-        if(!catalog || typeof catalog!=='object' || Array.isArray(catalog))throw new Error('El catálogo debe contener campañas identificadas por ID.');
-        for(const [id,campaign] of Object.entries(catalog)){
-          if(!/^\d+$/.test(id) || !campaign || !String(campaign.nombre_campana || '').trim())throw new Error('Cada campaña necesita un ID numérico en texto y nombre_campana.');
-          const entry={marca:String(campaign.marca || 'Sin marca'),nombre_campana:String(campaign.nombre_campana).trim(),anuncios:{}};
-          for(const [adId,ad] of Object.entries(campaign.anuncios || {})){
-            if(!/^\d+$/.test(adId) || !ad || !String(ad.nombre || '').trim())throw new Error('Cada anuncio necesita un ID numérico en texto y nombre.');
-            if(byAd[adId])throw new Error('Un anuncio figura en más de una campaña: '+adId);
-            entry.anuncios[adId]={nombre:String(ad.nombre).trim(),entrega:String(ad.entrega || 'Sin verificar')};
-            byAd[adId]={campana_id:id,campana_nombre:entry.nombre_campana,marca:entry.marca,anuncio_id:adId,anuncio_nombre:String(ad.nombre).trim(),anuncio_entrega:String(ad.entrega || 'Sin verificar')};
-          }
-          next[id]=entry;
+
+      function normalizeCampaignCatalog(payload) {
+        const catalog = {};
+        const byAd = {};
+
+        let items = [];
+        if (Array.isArray(payload)) {
+          items = payload;
+        } else if (payload && Array.isArray(payload.campañas || payload.campanas)) {
+          items = payload.campañas || payload.campanas;
+        } else if (payload && payload.catalogo_campanas) {
+          if (Array.isArray(payload.catalogo_campanas)) items = payload.catalogo_campanas;
+          else return normalizeDictionary(payload.catalogo_campanas);
+        } else if (payload && typeof payload === 'object') {
+          return normalizeDictionary(payload);
         }
-        window.META_ADS_CATALOG=next;window.META_ADS_BY_AD_ID=byAd;
+
+        items.forEach((c, idx) => {
+          if (!c || typeof c !== 'object') return;
+          const cId = String(c.identificador_de_la_campana || c.campana_id || c.campaign_id || c.id || idx).trim();
+          const brand = String(c.nombre_proyecto || c.marca || c.brand || c.proyecto || 'Sin marca').trim();
+          const cName = String(c.nombre_campana || c.campana || c.nombre || (brand !== 'Sin marca' ? brand + ' (' + cId + ')' : 'Campaña ' + cId)).trim();
+
+          catalog[cId] = catalog[cId] || {
+            campana_id: cId,
+            nombre_campana: cName,
+            marca: brand,
+            anuncios: {}
+          };
+
+          const ads = Array.isArray(c.anuncios || c.ads)
+            ? (c.anuncios || c.ads)
+            : (typeof c.anuncios === 'object' && c.anuncios !== null
+                ? Object.entries(c.anuncios).map(([k, v]) => ({ ...(v || {}), identificador_del_anuncio: k }))
+                : []);
+
+          ads.forEach((a, aIdx) => {
+            if (!a) return;
+            const aId = String(a.identificador_del_anuncio || a.anuncio_id || a.ad_id || a.id || aIdx).trim();
+            const aName = String(a.anuncio || a.nombre_anuncio || a.nombre || a.name || ('Anuncio ' + aId)).trim();
+            const aStatus = String(a.entrega || a.estado || a.status || 'Sin verificar').trim();
+
+            catalog[cId].anuncios[aId] = {
+              anuncio_id: aId,
+              nombre: aName,
+              entrega: aStatus
+            };
+
+            byAd[aId] = {
+              campana_id: cId,
+              campana_nombre: cName,
+              marca: brand,
+              anuncio_id: aId,
+              anuncio_nombre: aName,
+              anuncio_entrega: aStatus
+            };
+          });
+        });
+
+        return { catalog, byAd };
+
+        function normalizeDictionary(dict) {
+          const cat = {}, bAd = {};
+          for (const [id, campaign] of Object.entries(dict)) {
+            if (!campaign || typeof campaign !== 'object') continue;
+            const brand = String(campaign.marca || campaign.nombre_proyecto || 'Sin marca').trim();
+            const cName = String(campaign.nombre_campana || campaign.campana || campaign.nombre || (brand !== 'Sin marca' ? brand + ' (' + id + ')' : 'Campaña ' + id)).trim();
+            cat[id] = { campana_id: id, nombre_campana: cName, marca: brand, anuncios: {} };
+            const ads = campaign.anuncios || {};
+            if (Array.isArray(ads)) {
+              ads.forEach(a => {
+                if (!a) return;
+                const aId = String(a.identificador_del_anuncio || a.anuncio_id || a.ad_id || a.id || '').trim();
+                if (!aId) return;
+                const aName = String(a.anuncio || a.nombre || a.nombre_anuncio || aId).trim();
+                const aStatus = String(a.entrega || a.estado || 'Sin verificar').trim();
+                cat[id].anuncios[aId] = { anuncio_id: aId, nombre: aName, entrega: aStatus };
+                bAd[aId] = { campana_id: id, campana_nombre: cName, marca: brand, anuncio_id: aId, anuncio_nombre: aName, anuncio_entrega: aStatus };
+              });
+            } else {
+              for (const [adId, ad] of Object.entries(ads)) {
+                if (!ad || typeof ad !== 'object') continue;
+                const aName = String(ad.nombre || ad.anuncio || adId).trim();
+                const aStatus = String(ad.entrega || ad.estado || 'Sin verificar').trim();
+                cat[id].anuncios[adId] = { anuncio_id: adId, nombre: aName, entrega: aStatus };
+                bAd[adId] = { campana_id: id, campana_nombre: cName, marca: brand, anuncio_id: adId, anuncio_nombre: aName, anuncio_entrega: aStatus };
+              }
+            }
+          }
+          return { catalog: cat, byAd: bAd };
+        }
       }
 
+      window.setCampaignCatalog = setCampaignCatalog;
+      function setCampaignCatalog(catalogOrPayload) {
+        if (!catalogOrPayload) return;
+        const normalized = normalizeCampaignCatalog(catalogOrPayload);
+        if (Object.keys(normalized.catalog).length > 0) {
+          window.META_ADS_CATALOG = { ...window.META_ADS_CATALOG, ...normalized.catalog };
+          window.META_ADS_BY_AD_ID = { ...window.META_ADS_BY_AD_ID, ...normalized.byAd };
+        }
+      }
+      // Inicializar catálogo base de Meta Ads
+      setCampaignCatalog(window.BASE_META_ADS_CATALOG);
+
       // Resolvedor de Campaña y Anuncio según Etiquetas de CRM
-      window.resolveMetaAdDetails=function(contact,fallbackBrand){
-        const base={canal_entrada:'Origen no identificado',campana_marca:fallbackBrand||'Fenix',campana_id:null,anuncio_id:null,atribucion_confirmada:false,atribucion_nivel:'Sin evidencia publicitaria',anuncio_entrega:'Sin verificar',atribucion_alerta:''};
-        if(!contact)return {...base,campana_nombre:'Sin atribución CRM',anuncio_nombre:'Sin anuncio identificado',origen_anuncio:'Sin cruce CRM'};
-        const tags=String(contact.etiquetas || '').toLowerCase(),origin=String(contact.origen_contacto || '').toLowerCase();
-        const ads=[...new Set([...tags.matchAll(/\b(?:ref|ad)_(\d+)\b/g)].map(m=>m[1]))];
-        const campaigns=[...new Set([...tags.matchAll(/\bcampaign_(\d+)\b/g)].map(m=>m[1]))];
-        const knownAds=ads.filter(id=>window.META_ADS_BY_AD_ID[id]);
-        const implied=[...new Set([...knownAds.map(id=>window.META_ADS_BY_AD_ID[id].campana_id),...campaigns])];
-        const evidence=Boolean(ads.length||campaigns.length||/\bctwa\b/.test(tags));
-        base.canal_entrada=/\bctwa\b/.test(tags)?'Meta Ads · WhatsApp (CTWA)':evidence?(origin.includes('whatsapp')?'Meta Ads · WhatsApp':'Meta Ads (Facebook/Instagram)'):origin.includes('whatsapp')?'WhatsApp · sin ID publicitario':contact.origen_contacto || 'Origen no registrado en CRM';
-        if(ads.length>1 && knownAds.length!==ads.length)return {...base,campana_nombre:'Campaña pendiente de revisión',anuncio_nombre:'Varios IDs de anuncio',origen_anuncio:'IDs de anuncio parcialmente catalogados',atribucion_nivel:'IDs incompletos',atribucion_alerta:'Hay varios anuncios y algunos no figuran en el catálogo; no se eligió una campaña automáticamente.'};
-        if(implied.length>1)return {...base,campana_nombre:'Campaña ambigua · revisar etiquetas',anuncio_nombre:'Anuncio no asignado',origen_anuncio:'Etiquetas de campañas incompatibles',atribucion_nivel:'Conflicto de campañas',atribucion_alerta:'Se encontraron varios IDs de campaña incompatibles. No se atribuyó una campaña automáticamente.'};
-        if(ads.length===1 && knownAds.length===1){
-          const ad=window.META_ADS_BY_AD_ID[knownAds[0]];
-          return {...base,campana_id:ad.campana_id,anuncio_id:knownAds[0],campana_nombre:ad.campana_nombre,anuncio_nombre:ad.anuncio_nombre,anuncio_entrega:ad.anuncio_entrega,campana_marca:ad.marca,origen_anuncio:ad.campana_nombre+' — '+ad.anuncio_nombre,atribucion_confirmada:true,atribucion_nivel:'ID de anuncio'};
-        }
-        const campaignId=implied[0],catalog=window.META_ADS_CATALOG[campaignId];
-        if(catalog)return {...base,campana_id:campaignId,campana_nombre:catalog.nombre_campana,anuncio_nombre:ads.length>1?'Varios anuncios · sin asignar uno':'Anuncio no identificado',campana_marca:catalog.marca,origen_anuncio:catalog.nombre_campana,atribucion_confirmada:true,atribucion_nivel:ads.length>1?'Campaña identificada · varios anuncios':'ID de campaña'};
-        if(ads.length||campaigns.length)return {...base,campana_id:campaigns.length===1?campaigns[0]:null,anuncio_id:ads.length===1?ads[0]:null,campana_nombre:'Meta Ads · ID sin catalogar',anuncio_nombre:ads.length===1?`ID ${ads[0]} · sin catalogar`:'Anuncio no identificado',origen_anuncio:'IDs pendientes de catalogar',atribucion_nivel:'ID sin catalogar'};
-        const brand=/solintha/.test(tags)?'Solintha':/maki/.test(tags)?'Maki':/fenix|fnx/.test(tags)?'Fenix':fallbackBrand||'Fenix';
-        if(/camp_|solintha|maki|fenix|fnx|ctwa/.test(tags))return {...base,campana_marca:brand,campana_nombre:`${brand} · campaña no identificada`,anuncio_nombre:'Anuncio no identificado',origen_anuncio:'Solo etiqueta o canal',atribucion_nivel:'Solo etiqueta o canal'};
-        return {...base,campana_nombre:'Sin campaña identificada',anuncio_nombre:'Sin anuncio identificado',origen_anuncio:contact.origen_contacto || 'CRM sin origen registrado'};
-      };
+      window.resolveMetaAdDetails = function(contact, fallbackBrand) {
+        const base = {
+          canal_entrada: 'Origen no identificado',
+          campana_marca: fallbackBrand || 'Sin marca',
+          campana_id: null,
+          campana_nombre: 'Sin campaña identificada',
+          anuncio_id: null,
+          anuncio_nombre: 'Sin anuncio identificado',
+          anuncio_entrega: 'Sin verificar',
+          atribucion_confirmada: false,
+          atribucion_nivel: 'Sin evidencia publicitaria',
+          atribucion_alerta: '',
+          origen_anuncio: 'Sin cruce CRM'
+        };
+        if (!contact) return { ...base, campana_nombre: 'Sin atribución CRM', origen_anuncio: 'Sin cruce CRM' };
 
+        const rawTags = String(contact.etiquetas || contact.tags || contact.notas || '');
+        const tags = rawTags.toLowerCase();
+        const origin = String(contact.origen_contacto || contact.origen || '').toLowerCase();
 
-      async function readCampaignCatalogFile(file) {
-        if(file.name.toLowerCase().endsWith('.json')){
-          const payload=JSON.parse(await file.text());
-          return {catalog:payload.catalogo_campanas || payload,competitors:payload.catalogos?.competidores};
+        // 1. Canal de entrada
+        const isCtwa = /\bctwa\b|clic-to-whatsapp/.test(tags);
+        const isMetaAds = /facebook-ads-lead|meta-ads|facebook/.test(tags) || origin.includes('facebook') || origin.includes('instagram');
+        const isWa = /whatsapp/.test(tags) || origin.includes('whatsapp');
+
+        if (isCtwa) {
+          base.canal_entrada = 'Meta Ads · WhatsApp (CTWA)';
+        } else if (isMetaAds) {
+          base.canal_entrada = isWa ? 'Meta Ads · WhatsApp' : 'Meta Ads (Facebook/Instagram)';
+        } else if (isWa) {
+          base.canal_entrada = 'WhatsApp · sin ID publicitario';
+        } else {
+          base.canal_entrada = contact.origen_contacto || contact.origen || 'Origen no registrado en CRM';
         }
-        const workbook=XLSX.read(await file.arrayBuffer(),{type:'array'}),catalog={};
-        let found=false;
-        for(const sheetName of workbook.SheetNames){
-          const rows=XLSX.utils.sheet_to_json(workbook.Sheets[sheetName],{header:1,defval:null});
-          const key=value=>normalizeText(value).replace(/[^A-Z0-9]/g,'');
-          const headerIndex=rows.findIndex(row=>row.some(value=>['IDDECAMPANA','CAMPANAID','ID CAMPANA'.replace(/ /g,''),'CAMPAIGNID'].includes(key(value))));
-          if(headerIndex<0)continue;
-          const headers=rows[headerIndex].map(key);
-          const find=names=>headers.findIndex(header=>names.includes(header));
-          const cId=find(['IDDECAMPANA','IDCAMPANA','CAMPANAID','CAMPAIGNID']),cName=find(['CAMPANA','NOMBRECAMPANA','NOMBREDELACAMPANA','CAMPAIGNNAME']);
-          const aId=find(['IDDELANUNCIO','IDANUNCIO','ANUNCIOID','ADID']),aName=find(['ANUNCIO','NOMBREANUNCIO','NOMBREDELANUNCIO','ADNAME']),brand=find(['MARCA','BRAND']),status=find(['ESTADO','ENTREGA','STATUS']);
-          if(cName<0)throw new Error('Falta el nombre de campaña en '+sheetName);
-          const id=(value,label)=>{
-            if(value===null || value===undefined || String(value).trim()==='')return '';
-            if(typeof value==='number' && !Number.isSafeInteger(value))throw new Error(label+': el ID perdió precisión en Excel; guárdalo como texto.');
-            const text=String(value).trim();if(!/^\d+$/.test(text))throw new Error(label+': se requiere un ID numérico completo.');return text;
-          };
-          for(let r=headerIndex+1;r<rows.length;r++){
-            const row=rows[r];if(!row.some(value=>value!==null && value!==''))continue;
-            const campaignId=id(row[cId],'Campaña fila '+(r+1)),adId=aId>=0?id(row[aId],'Anuncio fila '+(r+1)):'';
-            if(!campaignId)throw new Error('Falta ID de campaña en fila '+(r+1));
-            const name=String(row[cName] || '').trim(),marca=brand>=0?String(row[brand] || 'Sin marca'):'Sin marca';
-            if(catalog[campaignId] && (catalog[campaignId].nombre_campana!==name || catalog[campaignId].marca!==marca))throw new Error('Campaña repetida con nombres o marcas incompatibles: '+campaignId);
-            catalog[campaignId] ||= {nombre_campana:name,marca,anuncios:{}};
-            if(adId){
-              const ad={nombre:aName>=0?String(row[aName] || '').trim():'',entrega:status>=0?String(row[status] || 'Sin verificar'):'Sin verificar'};
-              if(catalog[campaignId].anuncios[adId] && JSON.stringify(catalog[campaignId].anuncios[adId])!==JSON.stringify(ad))throw new Error('Anuncio repetido con valores incompatibles: '+adId);
-              catalog[campaignId].anuncios[adId]=ad;
-            }
-            found=true;
+
+        // 2. Detección de marca por etiquetas
+        let detectedBrand = fallbackBrand || 'Sin marca';
+        if (/solintha/.test(tags)) detectedBrand = 'SOLINTHA';
+        else if (/maki/.test(tags)) detectedBrand = 'MAKI';
+        else if (/fenix|fnx/.test(tags)) detectedBrand = 'FENIX';
+        base.campana_marca = detectedBrand;
+
+        // 3. Extracción de candidatos de ID de Anuncio y Campaña
+        const adsCandidates = [...new Set([...rawTags.matchAll(/(?:ref|ad)[_:-]?(\d{7,20})/gi)].map(m => m[1]))];
+        const campCandidates = [...new Set([...rawTags.matchAll(/(?:campaign|camp|c)[_:-]?(\d{7,20})/gi)].map(m => m[1]))];
+        const allNumbers = [...new Set([...rawTags.matchAll(/\b(\d{7,20})\b/g)].map(m => m[1]))];
+
+        // Buscar coincidencia exacta en catálogo de anuncios (window.META_ADS_BY_AD_ID)
+        let matchedAd = null;
+        for (const candidate of [...adsCandidates, ...allNumbers]) {
+          if (window.META_ADS_BY_AD_ID[candidate]) {
+            matchedAd = window.META_ADS_BY_AD_ID[candidate];
+            break;
           }
         }
-        if(!found)throw new Error('No se encontraron campañas. Usa columnas ID Campaña, Campaña, Marca, ID Anuncio y Anuncio.');
-        return {catalog};
+
+        if (matchedAd) {
+          return {
+            ...base,
+            campana_id: matchedAd.campana_id,
+            campana_nombre: matchedAd.campana_nombre,
+            campana_marca: matchedAd.marca.toUpperCase(),
+            anuncio_id: matchedAd.anuncio_id,
+            anuncio_nombre: matchedAd.anuncio_nombre,
+            anuncio_entrega: matchedAd.anuncio_entrega,
+            origen_anuncio: matchedAd.campana_nombre + ' — ' + matchedAd.anuncio_nombre,
+            atribucion_confirmada: true,
+            atribucion_nivel: 'ID de anuncio'
+          };
+        }
+
+        // Buscar coincidencia en catálogo de campañas (window.META_ADS_CATALOG)
+        let matchedCamp = null;
+        for (const candidate of [...campCandidates, ...allNumbers]) {
+          if (window.META_ADS_CATALOG[candidate]) {
+            matchedCamp = window.META_ADS_CATALOG[candidate];
+            break;
+          }
+        }
+
+        if (matchedCamp) {
+          return {
+            ...base,
+            campana_id: matchedCamp.campana_id,
+            campana_nombre: matchedCamp.nombre_campana,
+            campana_marca: matchedCamp.marca.toUpperCase(),
+            anuncio_id: adsCandidates.length === 1 ? adsCandidates[0] : null,
+            anuncio_nombre: adsCandidates.length === 1 ? ('ID ' + adsCandidates[0] + ' · sin catalogar') : 'Anuncio no identificado',
+            origen_anuncio: matchedCamp.nombre_campana,
+            atribucion_confirmada: true,
+            atribucion_nivel: adsCandidates.length > 1 ? 'Campaña identificada · varios anuncios' : 'ID de campaña'
+          };
+        }
+
+        // Si hay IDs con ref_ pero no estaban en catálogo
+        if (adsCandidates.length) {
+          return {
+            ...base,
+            campana_id: campCandidates.length === 1 ? campCandidates[0] : null,
+            anuncio_id: adsCandidates[0],
+            campana_nombre: 'Meta Ads · ID sin catalogar',
+            anuncio_nombre: 'ID ' + adsCandidates[0] + ' · sin catalogar',
+            origen_anuncio: 'IDs pendientes de catalogar',
+            atribucion_nivel: 'ID sin catalogar'
+          };
+        }
+
+        // Si hay ID de campaña en etiquetas pero sin anuncio catalogado
+        if (campCandidates.length) {
+          return {
+            ...base,
+            campana_id: campCandidates[0],
+            campana_nombre: 'Meta Ads · Campaña ' + campCandidates[0],
+            anuncio_id: null,
+            anuncio_nombre: 'Anuncio no identificado',
+            origen_anuncio: 'Campaña ' + campCandidates[0],
+            atribucion_confirmada: true,
+            atribucion_nivel: 'ID de campaña'
+          };
+        }
+
+        if (detectedBrand !== 'Sin marca') {
+          return {
+            ...base,
+            campana_marca: detectedBrand,
+            campana_nombre: detectedBrand + ' · campaña no identificada',
+            anuncio_nombre: 'Anuncio no identificado',
+            origen_anuncio: 'Solo etiqueta o canal',
+            atribucion_nivel: 'Solo etiqueta o canal'
+          };
+        }
+
+        return base;
+      };
+
+      async function readCampaignCatalogFile(file) {
+        if (file.name.toLowerCase().endsWith('.json')) {
+          const payload = JSON.parse(await file.text());
+          return { catalog: payload.catalogo_campanas || payload, competitors: payload.catalogos?.competidores };
+        }
+        const workbook = XLSX.read(await file.arrayBuffer(), { type: 'array' }), catalog = {};
+        let found = false;
+        for (const sheetName of workbook.SheetNames) {
+          const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, defval: null });
+          const key = value => normalizeText(value).replace(/[^A-Z0-9]/g, '');
+          const headerIndex = rows.findIndex(row => row && row.some(value => ['IDDECAMPANA', 'CAMPANAID', 'IDCAMPANA', 'CAMPAIGNID', 'IDENTIFICADORDECAMPANA'].includes(key(value))));
+          if (headerIndex < 0) continue;
+          const headers = rows[headerIndex].map(key);
+          const find = names => headers.findIndex(header => names.includes(header));
+          const cId = find(['IDDECAMPANA', 'IDCAMPANA', 'CAMPANAID', 'CAMPAIGNID', 'IDENTIFICADORDECAMPANA']);
+          const cName = find(['CAMPANA', 'NOMBRECAMPANA', 'NOMBREDELACAMPANA', 'CAMPAIGNNAME']);
+          const aId = find(['IDDELANUNCIO', 'IDANUNCIO', 'ANUNCIOID', 'ADID', 'IDENTIFICADORDELANUNCIO']);
+          const aName = find(['ANUNCIO', 'NOMBREANUNCIO', 'NOMBREDELANUNCIO', 'ADNAME']);
+          const brand = find(['MARCA', 'BRAND', 'PROYECTO', 'NOMBREPROYECTO']);
+          const status = find(['ESTADO', 'ENTREGA', 'STATUS']);
+
+          const id = (value, label) => {
+            if (value === null || value === undefined || String(value).trim() === '') return '';
+            const text = String(value).trim();
+            return text;
+          };
+
+          for (let r = headerIndex + 1; r < rows.length; r++) {
+            const row = rows[r];
+            if (!row || !row.some(value => value !== null && value !== '')) continue;
+            const campaignId = id(row[cId], 'Campaña fila ' + (r + 1));
+            const adId = aId >= 0 ? id(row[aId], 'Anuncio fila ' + (r + 1)) : '';
+            if (!campaignId) continue;
+            const marca = brand >= 0 ? String(row[brand] || 'Sin marca').trim() : 'Sin marca';
+            const name = cName >= 0 && row[cName] ? String(row[cName]).trim() : (marca !== 'Sin marca' ? marca + ' (' + campaignId + ')' : 'Campaña ' + campaignId);
+            
+            catalog[campaignId] = catalog[campaignId] || { campana_id: campaignId, nombre_campana: name, marca, anuncios: {} };
+            if (adId) {
+              const ad = {
+                anuncio_id: adId,
+                nombre: aName >= 0 && row[aName] ? String(row[aName]).trim() : ('Anuncio ' + adId),
+                entrega: status >= 0 && row[status] ? String(row[status]).trim() : 'Sin verificar'
+              };
+              catalog[campaignId].anuncios[adId] = ad;
+            }
+            found = true;
+          }
+        }
+        if (!found) throw new Error('No se encontraron campañas. Usa columnas ID Campaña, Campaña, Marca, ID Anuncio y Anuncio.');
+        return { catalog };
       }
 
       async function importCampaignCatalog(file) {
-        const parsed=await readCampaignCatalogFile(file);
-        if(!Object.keys(parsed.catalog).length)throw new Error('El catálogo está vacío.');
-        if(parsed.competitors!==undefined && (!Array.isArray(parsed.competitors) || parsed.competitors.some(value=>typeof value!=='string')))throw new Error('competidores debe ser una lista de nombres.');
-        setCampaignCatalog(parsed.catalog); // Validates the entire file before changing the active catalog.
-        const dataset={...(state.rawData || {data_oportunidades:[]}),catalogo_campanas:window.META_ADS_CATALOG,fuente_catalogo_campanas:file.name+' · '+businessToday()};
-        if(parsed.competitors)dataset.catalogos={...dataset.catalogos,competidores:[...new Set(parsed.competitors.map(value=>value.trim()).filter(Boolean))]};
-        applyLoadedData(dataset);
-        showToast('Catálogo actualizado desde '+file.name+'. Guarda el HTML para conservarlo.');
+        const parsed = await readCampaignCatalogFile(file);
+        if (!parsed.catalog) throw new Error('El catálogo está vacío.');
+        setCampaignCatalog(parsed.catalog);
+        const dataset = { ...(state.rawData || { data_oportunidades: [] }), catalogo_campanas: window.META_ADS_CATALOG, fuente_catalogo_campanas: file.name + ' · ' + businessToday() };
+        if (parsed.competitors) dataset.catalogos = { ...(dataset.catalogos || {}), competidores: [...new Set(parsed.competitors.map(value => value.trim()).filter(Boolean))] };
+        
+        // Actualizar badges e interfaz
+        updateCatalogSource();
+        populateGlobalFilterOptions();
+        populateCampaignAndAdDropdowns(state.allOpportunities || []);
+        applyFilters();
+        showToast('Catálogo de campañas actualizado desde ' + file.name);
       }
 
       function downloadCampaignCatalog() {
@@ -6364,47 +6682,117 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           this.clearLog();
           this.log(`Iniciando escaneo inteligente de archivos...`, 'info');
 
-          const allFiles = Array.from(files || []);
-          const catalogFiles=options.clientifyOnly?[]:allFiles.filter(file=>/CAMPAN.*ANUNCI|CATALOGO.*CAMPAN/.test(normalizeText(file.name)) && /\.(xlsx?|json)$/i.test(file.name));
-          for(const file of catalogFiles){
-            try {await importCampaignCatalog(file);this.log('Catálogo actualizado: '+file.name,'success');}
-            catch(error){this.log('Catálogo rechazado: '+error.message,'error');return;}
+          const allFiles = Array.from(files || []).filter(f => !f.name.startsWith('~$'));
+          if (allFiles.length === 0) {
+            this.log('No se seleccionaron archivos válidos.', 'error');
+            return;
           }
-          if(catalogFiles.length && catalogFiles.length===allFiles.length)return;
-          if(!options.clientifyOnly && allFiles.length===1 && allFiles[0].name.toLowerCase().endsWith('.json')){
-            try {
-              const payload=JSON.parse(await allFiles[0].text());
-              if(payload && Array.isArray(payload.data_oportunidades)){
-                applyLoadedData(payload);
-                this.log(`Base consolidada restaurada: ${state.allOpportunities.length} oportunidades.`, 'success');
-                showToast('Base comercial restaurada.');
-                return;
-              }
-            } catch(error){this.log(`JSON no válido: ${error.message}`,'error');return;}
-          }
-          
-          // 1. Detectar TODOS los archivos de Clientify Contactos (soporta 1 mes, 3 meses, o múltiples exportaciones)
-          const crmFiles = allFiles.filter(f => {
-            const n = f.name.toLowerCase();
-            const isJson = n.endsWith('.json');
-            const isClientifyName = n.startsWith('clientify_') || n.includes('contactos') || n.includes('clientify') || n.includes('leads');
-            return !catalogFiles.includes(f) && (options.clientifyOnly || isClientifyName) &&
-                   (n.endsWith('.xlsx') || n.endsWith('.xls') || isJson) &&
-                   !f.name.startsWith('~$');
-          });
 
-          // 2. Detectar TODOS los libros de asesores ignorando temporales ~$ y Doménica
-          const advisorFiles = allFiles.filter(f => {
-            const n = f.name.toLowerCase();
-            const isExcel = n.endsWith('.xlsx') || n.endsWith('.xls');
-            const isTemp = f.name.startsWith('~$');
-            const isCrm = n.startsWith('clientify_') || n.includes('clientify') || n.includes('contactos') || n.includes('leads');
-            const isDomenica = isExcludedAdvisor(n); // REGLA: DOMENICA NO TOMAR EN CUENTA
-            return !options.clientifyOnly && !catalogFiles.includes(f) && isExcel && !isTemp && !isCrm && !isDomenica;
-          });
+          // Detección inteligente por contenido y nombre
+          const catalogFiles = [];
+          const crmFiles = [];
+          const advisorFiles = [];
+
+          for (const file of allFiles) {
+            const n = file.name.toLowerCase();
+            if (options.clientifyOnly) {
+              if (n.endsWith('.xlsx') || n.endsWith('.xls') || n.endsWith('.json') || n.endsWith('.csv')) {
+                crmFiles.push(file);
+              }
+              continue;
+            }
+
+            if (n.endsWith('.json')) {
+              try {
+                const text = await file.text();
+                let payload = null;
+                try { payload = JSON.parse(text); } catch(e) {}
+                if (payload) {
+                  if (payload.campañas || payload.campanas || payload.catalogo_campanas || (Array.isArray(payload) && payload[0]?.identificador_de_la_campana) || /campan|anunci|catalog|meta/i.test(n)) {
+                    catalogFiles.push(file);
+                  } else if (payload.data_oportunidades && Array.isArray(payload.data_oportunidades)) {
+                    applyLoadedData(payload);
+                    this.log(`Base consolidada restaurada: ${state.allOpportunities.length} oportunidades.`, 'success');
+                    showToast('Base comercial restaurada.');
+                    return;
+                  } else if (payload.contactos || payload.contacts || (Array.isArray(payload) && payload[0]?.id && (payload[0]?.etiquetas || payload[0]?.tags))) {
+                    crmFiles.push(file);
+                  } else {
+                    if (/campan|anunci|catalog|meta/i.test(n)) catalogFiles.push(file);
+                    else crmFiles.push(file);
+                  }
+                }
+              } catch(e) {
+                this.log(`Error leyendo JSON ${file.name}: ${e.message}`, 'error');
+              }
+            } else if (n.endsWith('.xlsx') || n.endsWith('.xls') || n.endsWith('.csv')) {
+              if (/CAMPAN.*ANUNCI|CATALOGO.*CAMPAN/i.test(normalizeText(n))) {
+                catalogFiles.push(file);
+              } else if (n.startsWith('clientify_') || n.includes('contactos') || n.includes('clientify') || n.includes('leads')) {
+                crmFiles.push(file);
+              } else if (isExcludedAdvisor(n)) {
+                // REGLA: DOMENICA NO TOMAR EN CUENTA
+                continue;
+              } else {
+                try {
+                  const wb = XLSX.read(await file.arrayBuffer(), { type: 'array', cellDates: true, sheetRows: 5 });
+                  const sheetNames = wb.SheetNames || [];
+                  const isContactSheet = sheetNames.some(s => /contacto|clientify|lead/i.test(normalizeText(s)));
+                  const isOpSheet = sheetNames.some(s => /oportunidad/i.test(normalizeText(s)));
+                  const isCampSheet = sheetNames.some(s => /campan|anunci/i.test(normalizeText(s)));
+
+                  if (isContactSheet) {
+                    crmFiles.push(file);
+                  } else if (isOpSheet) {
+                    advisorFiles.push(file);
+                  } else if (isCampSheet) {
+                    catalogFiles.push(file);
+                  } else {
+                    const firstSheet = wb.Sheets[sheetNames[0]];
+                    const sampleRows = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: null });
+                    const firstHeaders = (sampleRows[0] || []).map(normalizeText);
+                    if (firstHeaders.includes('ETIQUETAS') || (firstHeaders.includes('ID') && firstHeaders.some(h => h.includes('ORIGEN') || h.includes('PROPIETARIO')))) {
+                      crmFiles.push(file);
+                    } else if (firstHeaders.some(h => h.includes('CLIENTE')) && firstHeaders.some(h => h.includes('ETAPA'))) {
+                      advisorFiles.push(file);
+                    } else {
+                      advisorFiles.push(file);
+                    }
+                  }
+                } catch(e) {
+                  advisorFiles.push(file);
+                }
+              }
+            }
+          }
+
+          // 1. Procesar Catálogo de Campañas si está presente
+          for (const file of catalogFiles) {
+            try {
+              await importCampaignCatalog(file);
+              this.log(`Catálogo cargado: ${file.name} (${Object.keys(window.META_ADS_CATALOG).length} campañas, ${Object.keys(window.META_ADS_BY_AD_ID).length} anuncios).`, 'success');
+            } catch(error) {
+              this.log(`Error en catálogo ${file.name}: ${error.message}`, 'error');
+              return;
+            }
+          }
+
+          // Si SOLO se subió el catálogo de campañas
+          if (catalogFiles.length > 0 && catalogFiles.length === allFiles.length) {
+            populateCampaignAndAdDropdowns(state.allOpportunities || []);
+            populateGlobalFilterOptions();
+            document.getElementById('stat-proc-files').textContent = catalogFiles.length;
+            document.getElementById('stat-proc-raw').textContent = state.allOpportunities.length;
+            document.getElementById('stat-proc-clean').textContent = state.allOpportunities.filter(o => !o.es_duplicado).length;
+            document.getElementById('stat-proc-time').textContent = `Catálogo listo: ${new Date().toLocaleTimeString()}`;
+            document.getElementById('btn-apply-and-close').style.display = 'inline-flex';
+            this.log(`🎉 Catálogo importado con éxito: ${Object.keys(window.META_ADS_CATALOG).length} campañas registradas. Los selectores de Campaña y Anuncio están listos para filtrar.`, 'success');
+            showToast(`Catálogo listo: ${Object.keys(window.META_ADS_CATALOG).length} campañas cargadas`);
+            return;
+          }
 
           if (advisorFiles.length === 0 && crmFiles.length === 0) {
-            this.log(`No se encontraron archivos Excel (.xlsx/.xls) válidos en la selección.`, 'error');
+            this.log(`No se encontraron archivos Excel (.xlsx/.xls) ni contactos CRM válidos en la selección.`, 'error');
             return;
           }
 
@@ -6419,57 +6807,234 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           });
 
           // Canonical contact snapshots; never select the first shared phone/name.
-          const contactsById=new Map();
-          let totalCrmContacts=0,crmReadErrors=0,crmRowsWithoutId=0;
-          let crmStateCounts={};
-          crmFiles.sort((a,b)=>(a.lastModified || 0)-(b.lastModified || 0) || a.name.localeCompare(b.name));
-          for(const file of crmFiles){
+          const contactsById = new Map();
+          let totalCrmContacts = 0, crmReadErrors = 0, crmRowsWithoutId = 0;
+          let crmStateCounts = {};
+          crmFiles.sort((a,b) => (a.lastModified || 0) - (b.lastModified || 0) || a.name.localeCompare(b.name));
+
+          for (const file of crmFiles) {
             try {
               let rows;
-              if(file.name.toLowerCase().endsWith('.json'))rows=this.parseClientifyJson(await file.text());
-              else {const wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:true});rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames.includes('Contactos')?'Contactos':wb.SheetNames[0]],{header:1,defval:null});}
-              if(!Array.isArray(rows) || !rows.length){this.log(`${file.name}: exportación vacía.`,'info');continue;}
-              const headers=(rows[0] || []).map(normalizeText);
-              const find=values=>headers.findIndex(header=>values.some(value=>header===value || header.includes(value)));
-              const idCol=headers.indexOf('ID'),nameCol=find(['NOMBRE']),lastCol=find(['APELLIDO']),companyCol=find(['EMPRESA']),ownerCol=find(['PROPIETARIO']),originCol=find(['ORIGEN CONTACTO']),stateCol=headers.indexOf('ESTADO'),createdCol=find(['CREADO']),tagsCol=find(['ETIQUETA']);
-              if(idCol<0)throw new Error('Falta la columna ID de contacto; no se usó otra columna como identificador.');
-              const phoneCols=headers.map((header,i)=>header.includes('TELEFONO')?i:-1).filter(i=>i>=0);
-              const value=(row,col)=>col>=0 && row[col]!=null?String(row[col]).trim():'';
-              let added=0;
-              for(let i=1;i<rows.length;i++){
-                const row=rows[i];if(!row || !row.some(cell=>cell!==null && cell!==''))continue;
-                const id=value(row,idCol);if(!id){crmRowsWithoutId++;continue;}
-                let owner=value(row,ownerCol);if(isExcludedAdvisor(owner))continue;
-                if(normalizeText(owner).includes('MARJORIE'))owner='Gabriela Lugmaña';
-                const date=createdCol>=0?row[createdCol]:'';
-                const created=date instanceof Date?`${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`:String(date || '');
-                const contact={id,nombre_completo:[value(row,nameCol),value(row,lastCol)].filter(Boolean).join(' '),empresa:value(row,companyCol),propietario:owner,origen_contacto:value(row,originCol),estado_crm:value(row,stateCol),creado_iso:created,etiquetas:value(row,tagsCol),telefonos:contactPhoneKeys(phoneCols.map(col=>row[col])),archivo_crm:file.name,fila_crm:i+1};
-                contactsById.set(id,contact);added++;
+              if (file.name.toLowerCase().endsWith('.json')) {
+                rows = this.parseClientifyJson(await file.text());
+              } else {
+                const wb = XLSX.read(await file.arrayBuffer(), { type: 'array', cellDates: true });
+                const sheetName = wb.SheetNames.find(s => /contacto|clientify|lead/i.test(normalizeText(s))) || wb.SheetNames[0];
+                rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, defval: null });
               }
-              this.log(`${file.name}: ${added} filas de contactos leídas. Se conserva una versión por ID.`, 'success');
-            } catch(error){crmReadErrors++;this.log(`Error CRM ${file.name}: ${error.message}`,'error');}
+              if (!Array.isArray(rows) || !rows.length) {
+                this.log(`${file.name}: exportación vacía.`, 'info');
+                continue;
+              }
+
+              const headers = (rows[0] || []).map(normalizeText);
+              const find = values => headers.findIndex(header => values.some(value => header === value || header.includes(value)));
+              const idCol = headers.indexOf('ID');
+              const nameCol = find(['NOMBRE']);
+              const lastCol = find(['APELLIDO']);
+              const companyCol = find(['EMPRESA']);
+              const ownerCol = find(['PROPIETARIO']);
+              const originCol = find(['ORIGEN CONTACTO', 'ORIGEN']);
+              const stateCol = headers.indexOf('ESTADO');
+              const createdCol = find(['CREADO', 'FECHA DE CREACION', 'FECHA CREACION', 'FECHA']);
+              const tagsCol = find(['ETIQUETAS', 'TAGS']);
+              const impWonCol = find(['IMPORTE DE OPORTUNIDADES GANADAS', 'GANADAS', 'IMPORTE GANADO']);
+              const impLostCol = find(['IMPORTE DE OPORTUNIDADES PERDIDAS', 'PERDIDAS', 'IMPORTE PERDIDO']);
+              const activeStageCol = find(['ETAPA DE OPORTUNIDAD ACTIVA', 'ETAPA OPORTUNIDAD', 'ETAPA ACTIVA']);
+              const demoCol = find(['DEMO', 'VISITA']);
+
+              const phoneCols = headers.reduce((acc, h, i) => (h.includes('TELEFONO') || h.includes('MOVIL') || h.includes('PHONE') ? [...acc, i] : acc), []);
+              const emailCols = headers.reduce((acc, h, i) => (h.includes('CORREO') || h.includes('EMAIL') ? [...acc, i] : acc), []);
+
+              if (idCol < 0) throw new Error('No se encontró columna ID en ' + file.name);
+
+              const value = (row, col) => col >= 0 && row[col] !== null && row[col] !== undefined ? String(row[col]).trim() : '';
+              let added = 0;
+
+              for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || !row.some(v => v !== null && v !== '')) continue;
+                const id = value(row, idCol);
+                if (!id) { crmRowsWithoutId++; continue; }
+
+                let owner = value(row, ownerCol);
+                if (isExcludedAdvisor(owner)) continue;
+                if (normalizeText(owner) === 'MARJORIE CASA') owner = 'Gabriela Lugmaña';
+
+                const date = row[createdCol];
+                const created = date instanceof Date
+                  ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+                  : String(date || '');
+
+                const contact = {
+                  id,
+                  nombre_completo: [value(row, nameCol), value(row, lastCol)].filter(Boolean).join(' '),
+                  empresa: value(row, companyCol),
+                  propietario: owner,
+                  origen_contacto: value(row, originCol),
+                  estado_crm: value(row, stateCol),
+                  creado_iso: created,
+                  etiquetas: value(row, tagsCol),
+                  importe_ganadas: impWonCol >= 0 ? Number(row[impWonCol] || 0) : 0,
+                  importe_perdidas: impLostCol >= 0 ? Number(row[impLostCol] || 0) : 0,
+                  etapa_activa: value(row, activeStageCol),
+                  demo: value(row, demoCol),
+                  telefonos: contactPhoneKeys(phoneCols.map(col => row[col])),
+                  correos: emailCols.map(col => value(row, col)).filter(Boolean),
+                  archivo_crm: file.name,
+                  fila_crm: i + 1
+                };
+
+                // Enriquecer contacto con atribución publicitaria
+                const metaDetails = window.resolveMetaAdDetails(contact);
+                Object.assign(contact, metaDetails);
+
+                contactsById.set(id, contact);
+                added++;
+              }
+              this.log(`${file.name}: ${added} filas de contactos leídas y vinculadas a campañas.`, 'success');
+            } catch(error) {
+              crmReadErrors++;
+              this.log(`Error CRM ${file.name}: ${error.message}`, 'error');
+            }
           }
-          if(crmFiles.length && crmReadErrors===crmFiles.length){
-            if(!advisorFiles.length){showToast('No se pudo leer Clientify; se conservan los datos anteriores.','error');return;}
-            this.log('No se pudo leer Clientify. Los libros se cruzarán con la base CRM anterior si existe.','warn');
+
+          if (crmFiles.length && crmReadErrors === crmFiles.length) {
+            if (!advisorFiles.length) {
+              showToast('No se pudo leer Clientify; se conservan los datos anteriores.', 'error');
+              return;
+            }
+            this.log('No se pudo leer Clientify. Los libros se cruzarán con la base CRM anterior si existe.', 'warn');
           }
-          const sourceContacts=crmFiles.length && crmReadErrors<crmFiles.length?[...contactsById.values()]:state.crmContacts;
-          const crmIndex=buildCrmIndex(sourceContacts,Boolean(crmFiles.length) || state.rawData?.metadata?.crm_index_complete!==false);
-          state.crmContacts=[...crmIndex.byId.values()];
-          totalCrmContacts=state.crmContacts.length;
-          state.crmContacts.forEach(contact=>{const key=normalizeCrmState(contact.estado_crm);crmStateCounts[key]=(crmStateCounts[key] || 0)+1});
-          if(crmRowsWithoutId)this.log(`${crmRowsWithoutId} filas sin ID no se incluyeron en el índice CRM.`, 'warn');
+
+          const sourceContacts = crmFiles.length && crmReadErrors < crmFiles.length ? [...contactsById.values()] : state.crmContacts;
+          const crmIndex = buildCrmIndex(sourceContacts, Boolean(crmFiles.length) || state.rawData?.metadata?.crm_index_complete !== false);
+          state.crmContacts = [...crmIndex.byId.values()];
+          totalCrmContacts = state.crmContacts.length;
+          state.crmContacts.forEach(contact => {
+            const key = normalizeCrmState(contact.estado_crm);
+            crmStateCounts[key] = (crmStateCounts[key] || 0) + 1;
+          });
+
+          if (crmRowsWithoutId) this.log(`${crmRowsWithoutId} filas sin ID no se incluyeron en el índice CRM.`, 'warn');
           this.log(`Índice consolidado: ${totalCrmContacts} contactos únicos.`, 'success');
 
-          if (advisorFiles.length === 0 && crmFiles.length > 0 && state.allOpportunities.length > 0) {
-            const sourceOpportunities=state.rawData?.data_oportunidades || state.allOpportunities;
-            const updatedOpportunities=sourceOpportunities.map(op=>enrichOpportunityWithCrm(op,crmIndex));
+          // CASO: SOLO ARCHIVO CRM CLIENTIFY (Sin libros de asesores)
+          if (advisorFiles.length === 0 && crmFiles.length > 0) {
+            let updatedOpportunities = [];
+            if (state.allOpportunities.length > 0) {
+              const sourceOpportunities = state.rawData?.data_oportunidades || state.allOpportunities;
+              updatedOpportunities = sourceOpportunities.map(op => enrichOpportunityWithCrm(op, crmIndex));
+            } else {
+              // Sintetizar oportunidades desde contactos CRM con etapa o importe
+              const probMap = {
+                'Cliente Ganado': 1.0, 'Negociación': 0.8, 'Seguimiento': 0.6,
+                'Cotización': 0.5, 'Demo': 0.3, 'Asignar Producto': 0.2,
+                'Cerrado-Perdido': 0.0, 'Sin Etapa': 0.0
+              };
+
+              updatedOpportunities = state.crmContacts.map((contact, idx) => {
+                let empleado = contact.propietario || 'Sin asesor';
+                if (normalizeText(empleado) === 'MARJORIE CASA') empleado = 'Gabriela Lugmaña';
+
+                let etapa = 'Sin Etapa';
+                const wonAmount = Number(contact.importe_ganadas || 0);
+                const lostAmount = Number(contact.importe_perdidas || 0);
+                const crmStateNorm = normalizeText(contact.estado_crm || '');
+                const activeStageNorm = normalizeText(contact.etapa_activa || '');
+
+                if (wonAmount > 0 || crmStateNorm === 'CLIENTE') {
+                  etapa = 'Cliente Ganado';
+                } else if (activeStageNorm.includes('NEGOCIAC')) {
+                  etapa = 'Negociación';
+                } else if (activeStageNorm.includes('COTIZAC') || activeStageNorm.includes('OFERTA')) {
+                  etapa = 'Cotización';
+                } else if (activeStageNorm.includes('SEGUIM') || activeStageNorm.includes('CONTACT')) {
+                  etapa = 'Seguimiento';
+                } else if (activeStageNorm.includes('DEMO')) {
+                  etapa = 'Demo';
+                } else if (activeStageNorm.includes('ASIGN')) {
+                  etapa = 'Asignar Producto';
+                } else if (lostAmount > 0 || crmStateNorm.includes('PERDIDO')) {
+                  etapa = 'Cerrado-Perdido';
+                } else if (crmStateNorm === 'EN OPORTUNIDAD' || crmStateNorm.includes('CALIENTE')) {
+                  etapa = 'Seguimiento';
+                } else if (crmStateNorm.includes('TEMPLADO')) {
+                  etapa = 'Demo';
+                } else if (crmStateNorm.includes('FRIO') || crmStateNorm.includes('FRÍO')) {
+                  etapa = 'Asignar Producto';
+                }
+
+                const prob = probMap[etapa] !== undefined ? probMap[etapa] : 0.2;
+                const montoIva = wonAmount > 0 ? wonAmount : 0;
+                const montoNeto = Math.round(montoIva / 1.15 * 100) / 100;
+                const isSolinthaAdv = isWithoutQuota({ empleado });
+                const montoPonderado = isSolinthaAdv ? 0 : Math.round(montoIva * prob * 100) / 100;
+
+                const iso = validIsoDate(contact.creado_iso) || businessToday();
+                const parts = iso.split('-');
+                const monthNum = parts[1] || '10';
+                const dayNum = parseInt(parts[2] || '1', 10);
+                const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+                const monthName = months[parseInt(monthNum, 10) - 1] || 'Octubre';
+
+                let sem = 'Semana 1';
+                if (dayNum > 21) sem = 'Semana 4';
+                else if (dayNum > 14) sem = 'Semana 3';
+                else if (dayNum > 7) sem = 'Semana 2';
+
+                const demoVal = (contact.demo === 'Sí' || /demo realizada/i.test(contact.etiquetas || '')) ? 'Sí' : 'No';
+
+                return {
+                  trace_id: `CRM-${contact.id || (idx + 1)}`,
+                  fila_excel: idx + 1,
+                  numero_item: idx + 1,
+                  archivo_origen: contact.archivo_crm || 'Clientify CRM',
+                  cliente: contact.nombre_completo || contact.empresa || `Contacto #${contact.id}`,
+                  cliente_norm: normalizeText(contact.nombre_completo || contact.empresa || ''),
+                  empresa: contact.empresa || '',
+                  empleado: empleado,
+                  etapa: etapa,
+                  probabilidad: prob,
+                  monto_iva: montoIva,
+                  monto_neto: montoNeto,
+                  monto_ponderado_iva: montoPonderado,
+                  marca: isSolinthaAdv ? 'Solintha' : (contact.campana_marca || 'Sin marca'),
+                  producto_principal: 'Software TPV / ERP',
+                  producto_adicional: '',
+                  producto_maki: '',
+                  origen: contact.canal_entrada || 'Meta Ads',
+                  sector: contact.sector || 'Comercial',
+                  tipo_servicio: 'TPV / POS',
+                  fecha_inicio_iso: iso,
+                  fecha_cierre_iso: iso,
+                  mes: monthName,
+                  semana: sem,
+                  realizo_demo_visita: demoVal,
+                  clientify_id: String(contact.id || ''),
+                  crm_contacto: contact,
+                  cruce_confianza: 'Alto',
+                  atribucion_confirmada: Boolean(contact.atribucion_confirmada),
+                  atribucion_nivel: contact.atribucion_nivel || 'Sin evidencia',
+                  campana_id: contact.campana_id || null,
+                  campana_nombre: contact.campana_nombre || 'Sin campaña',
+                  anuncio_id: contact.anuncio_id || null,
+                  anuncio_nombre: contact.anuncio_nombre || 'Sin anuncio',
+                  anuncio_entrega: contact.anuncio_entrega || 'Sin verificar',
+                  canal_entrada: contact.canal_entrada || 'Origen CRM',
+                  etiquetas: contact.etiquetas || '',
+                  es_duplicado: false,
+                  es_venta_cruzada: false
+                };
+              });
+            }
+
             const previousMetadata = state.rawData?.metadata || {};
             const result = {
               ...state.rawData,
               metadata: {
                 ...previousMetadata,
-                fecha_actualizacion: new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Guayaquil',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date()),
+                fecha_actualizacion: new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Guayaquil', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).format(new Date()),
                 directorio_origen: folderName || 'Clientify CRM',
                 cruce_clientify_activo: totalCrmContacts > 0,
                 crm_index_complete: crmIndex.complete,
@@ -6478,6 +7043,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                 rango_crm_desde: state.crmDateRange.start,
                 rango_crm_hasta: state.crmDateRange.end,
                 estados_crm: crmStateCounts,
+                total_duplicados_detectados: 0,
+                total_registros_limpios: updatedOpportunities.length,
                 total_oportunidades_cruzadas: updatedOpportunities.filter(opportunity => opportunity.crm_contacto).length
               },
               crm_contacts: state.crmContacts,
@@ -6487,12 +7054,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
             this.lastResult = result;
             document.getElementById('stat-proc-files').textContent = crmFiles.length;
             document.getElementById('stat-proc-raw').textContent = updatedOpportunities.length;
-            document.getElementById('stat-proc-dup').textContent = result.metadata.total_duplicados_detectados || 0;
-            document.getElementById('stat-proc-clean').textContent = result.metadata.total_registros_limpios || updatedOpportunities.filter(opportunity => !opportunity.es_duplicado).length;
+            document.getElementById('stat-proc-dup').textContent = 0;
+            document.getElementById('stat-proc-clean').textContent = updatedOpportunities.length;
             document.getElementById('stat-proc-time').textContent = `Clientify actualizado: ${new Date().toLocaleTimeString()}`;
             document.getElementById('btn-download-datos-js').removeAttribute('disabled');
             document.getElementById('btn-apply-and-close').style.display = 'inline-flex';
-            this.log(`Clientify actualizado: ${totalCrmContacts} contactos y ${result.metadata.total_oportunidades_cruzadas} oportunidades conciliadas.`, 'success');
+            this.log(`Clientify actualizado: ${totalCrmContacts} contactos y ${updatedOpportunities.length} oportunidades comerciales listas.`, 'success');
             applyLoadedData(result);
             showToast(`Clientify actualizado: ${totalCrmContacts.toLocaleString()} contactos`);
             return;
@@ -6746,6 +7313,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
               const colSem = findColKey(['SEMANA']);
               const colEtapa = findColKey(['ETAPA']);
               const colDemo = findColKey(['DEMO', 'VISITA']);
+              const colEtiquetas = findColKey(['ETIQUETAS', 'TAGS', 'LABELS', 'ETIQUETA']);
 
               let colMonto = null;
               for (const [k, v] of Object.entries(colMap)) {
@@ -6859,6 +7427,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                 }
                 const linkParsed = parseClientify(rawLink);
 
+                // Etiquetas
+                const valEtiquetas = colEtiquetas !== undefined ? row[colEtiquetas] : null;
+                const etiquetas = valEtiquetas !== null && valEtiquetas !== undefined ? String(valEtiquetas).trim() : '';
+
                 // Fechas
                 const valFechaIni = colFechaInicio !== undefined ? row[colFechaInicio] : null;
                 const fIni = parseFecha(valFechaIni);
@@ -6941,7 +7513,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                 const crmContactForRecord=matchCrm?{...matchCrm}:null;
 
                 // Atribución de Campaña y Anuncio Meta Ads
-                const adDetails = window.resolveMetaAdDetails(matchCrm, rowMarca);
+                const contactToResolve = matchCrm || (etiquetas ? { etiquetas } : null);
+                const adDetails = window.resolveMetaAdDetails(contactToResolve, rowMarca);
                 const itemRecord = {
                   trace_id: traceId,
                   fila_excel: excelRowNum,
@@ -6988,12 +7561,17 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
                   clientify_id: linkParsed.id,
                   crm_contacto: crmContactForRecord,
                   metodo_cruce: metodoCruce,
+                  campana_id: adDetails.campana_id || null,
                   campana_nombre: adDetails.campana_nombre,
+                  anuncio_id: adDetails.anuncio_id || null,
                   anuncio_nombre: adDetails.anuncio_nombre,
                   anuncio_entrega: adDetails.anuncio_entrega,
+                  atribucion_confirmada: Boolean(adDetails.atribucion_confirmada),
+                  atribucion_nivel: adDetails.atribucion_nivel || 'Sin evidencia',
                   campana_marca: adDetails.campana_marca || marcaFinal,
                   canal_entrada: adDetails.canal_entrada,
                   origen_anuncio: adDetails.origen_anuncio,
+                  etiquetas: etiquetas || (matchCrm?.etiquetas || ''),
                   es_duplicado: false,
                   duplicado_de_trace_id: null,
                   motivo_duplicado: null,
@@ -7171,7 +7749,13 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         const brandSelect = document.getElementById('filter-brand');
         if (brandSelect) {
           const curBrand = state.filters.brand;
-          const brandList = [...new Set(ops.map(o => o.marca))].filter(Boolean).sort();
+          let brandList = [...new Set([
+            ...ops.map(o => o.marca),
+            ...Object.values(window.META_ADS_CATALOG || {}).map(c => c.marca),
+            ...(state.crmContacts || []).map(c => c.campana_marca)
+          ])].filter(Boolean).map(b => b.toUpperCase()).sort();
+          if (brandList.length === 0) brandList = ['FENIX', 'MAKI', 'SOLINTHA'];
+          brandList = [...new Set(brandList)];
           brandSelect.innerHTML = '<option value="all">Todas las Marcas</option>';
           brandList.forEach(b => {
             const opt = document.createElement('option');
@@ -7318,12 +7902,30 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
         // 2.1 Filtro de Campaña Meta Ads (1:N)
         if (state.filters.campaign && state.filters.campaign !== 'all') {
-          list = list.filter(o => o.campana_nombre === state.filters.campaign);
+          const campFilter = String(state.filters.campaign).trim();
+          list = list.filter(o => {
+            if (String(o.campana_id || '').trim() === campFilter) return true;
+            if (String(o.campana_nombre || '').trim() === campFilter) return true;
+            if (String(o.etiquetas || '').includes(campFilter)) return true;
+            if (String(o.crm_contacto?.etiquetas || '').includes(campFilter)) return true;
+            if (o.anuncio_id && window.META_ADS_BY_AD_ID && window.META_ADS_BY_AD_ID[o.anuncio_id]) {
+              const adInfo = window.META_ADS_BY_AD_ID[o.anuncio_id];
+              if (String(adInfo.campana_id || '').trim() === campFilter || String(adInfo.campana_nombre || '').trim() === campFilter) return true;
+            }
+            return false;
+          });
         }
 
         // 2.2 Filtro de Anuncio Específico (1:N)
         if (state.filters.ad && state.filters.ad !== 'all') {
-          list = list.filter(o => o.anuncio_nombre === state.filters.ad);
+          const adFilter = String(state.filters.ad).trim();
+          list = list.filter(o => {
+            if (String(o.anuncio_id || '').trim() === adFilter) return true;
+            if (String(o.anuncio_nombre || '').trim() === adFilter) return true;
+            if (String(o.etiquetas || '').includes(adFilter)) return true;
+            if (String(o.crm_contacto?.etiquetas || '').includes(adFilter)) return true;
+            return false;
+          });
         }
 
         // 3. Filtro Solo Venta Cruzada
@@ -7697,14 +8299,14 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           labels=['Lead Frío','Lead Templado','Lead Caliente','En Oportunidad','Lead Perdido','Cliente Perdido','No Calificado','Cliente','Otro'];
           counts=labels.map(label=>state.crmContacts.filter(contact=>normalizeCrmState(contact.estado_crm)===label).length);
         } else {
-          labels=[...new Set(['Cliente Ganado','Negociación','Seguimiento','Cotización','Demo','Asignar Producto','Cerrado-Perdido','Sin Etapa',...ops.map(op=>op.etapa)])];
+          labels=[...new Set(['Cliente Ganado','Negociación','Seguimiento','Cotización','Demo','Asignar Producto','Cerrado-Perdido','Sin Etapa',...ops.map(op=>op.etapa).filter(Boolean)])];
           counts=labels.map(label=>ops.filter(op=>op.etapa===label).length);
         }
         const total=globalCrm?state.crmContacts.length:ops.length;
         document.getElementById('exec-states-subtitle').textContent=globalCrm?'Estados actuales de los contactos CRM · base completa; no representan un historial de avance':'Etapas actuales de las oportunidades · filtros comerciales aplicados';
         document.getElementById('exec-states-badge').textContent=globalCrm?`${total} contactos CRM`:`${total} oportunidades`;
         document.getElementById('exec-states-legend').textContent=globalCrm?'La conversión comercial superior se calcula con oportunidades de asesores. Este gráfico describe una población diferente: contactos CRM únicos.':'Las categorías incluyen registros sin etapa para conservar el total de la selección.';
-        auditedChart('execStates','chart-exec-states-bar',{type:'bar',data:{labels,datasets:[{label:globalCrm?'Contactos CRM (%)':'Oportunidades (%)',data:counts.map(count=>total?Number((count/total*100).toFixed(1)):0),backgroundColor:labels.map((label,i)=>label.includes('Ganado')||label==='Cliente'?'#059669':label.includes('Perdido')?'#E11D48':['#2563EB','#7C3AED','#D97706','#0891B2','#64748B'][i%5]),borderRadius:5}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${counts[c.dataIndex]} de ${total} · ${c.raw}%`}}},scales:{x:{beginAtZero:true,max:100,ticks:{callback:value=>value+'%'}},y:{grid:{display:false}}}}});
+        auditedChart('execStates','chart-exec-states-bar',{type:'bar',data:{labels,datasets:[{label:globalCrm?'Contactos CRM (%)':'Oportunidades (%)',data:counts.map(count=>total?Number((count/total*100).toFixed(1)):0),backgroundColor:labels.map((label,i)=>(label || '').includes('Ganado')||label==='Cliente'?'#059669':label.includes('Perdido')?'#E11D48':['#2563EB','#7C3AED','#D97706','#0891B2','#64748B'][i%5]),borderRadius:5}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${counts[c.dataIndex]} de ${total} · ${c.raw}%`}}},scales:{x:{beginAtZero:true,max:100,ticks:{callback:value=>value+'%'}},y:{grid:{display:false}}}}});
       }
 
       function renderTabMarketing() {
@@ -8032,48 +8634,148 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       // ======================================================================
       // 5. HELPER PARA SELECTORES JERÁRQUICOS 1:N (CAMPAÑAS Y ANUNCIOS)
       // ======================================================================
-      function populateCampaignAndAdDropdowns(ops) {
+      window.populateCampaignAndAdDropdowns = populateCampaignAndAdDropdowns;
+      function populateCampaignAndAdDropdowns(ops = []) {
         const curBrand = state.filters.brand || 'all';
         const curCamp = state.filters.campaign || 'all';
         const curAd = state.filters.ad || 'all';
 
-        // 1. Filtrar lista por marca seleccionada
-        let campOps = ops;
-        if (curBrand !== 'all') {
-          campOps = campOps.filter(o => o.marca === curBrand);
+        // Recolectar campañas de todas las fuentes: Catálogo activo, Oportunidades y Contactos CRM
+        const campaignsMap = new Map();
+
+        // 1. Del catálogo maestro activo (window.META_ADS_CATALOG)
+        for (const [id, c] of Object.entries(window.META_ADS_CATALOG || {})) {
+          if (!id || !c) continue;
+          const brand = String(c.marca || 'Sin marca').trim();
+          const name = String(c.nombre_campana || id).trim();
+          campaignsMap.set(String(id), {
+            id: String(id),
+            name: name,
+            marca: brand,
+            ads: Object.entries(c.anuncios || {}).map(([aId, a]) => ({
+              id: String(aId),
+              nombre: String(a.nombre || aId),
+              entrega: String(a.entrega || 'Sin verificar')
+            }))
+          });
         }
 
-        const campList = [...new Set(campOps.map(o => o.campana_nombre))].filter(Boolean).sort();
+        // 2. De las oportunidades
+        (ops || []).forEach(o => {
+          const id = o.campana_id ? String(o.campana_id) : null;
+          const name = o.campana_nombre || id;
+          const brand = o.marca || o.campana_marca || 'Sin marca';
+          if (id && !campaignsMap.has(id)) {
+            campaignsMap.set(id, { id, name, marca: brand, ads: [] });
+          } else if (!id && name && !name.toLowerCase().includes('sin campaña') && !name.toLowerCase().includes('sin atribución') && !campaignsMap.has(name)) {
+            campaignsMap.set(name, { id: name, name, marca: brand, ads: [] });
+          }
+        });
+
+        // 3. De los contactos CRM
+        (state.crmContacts || []).forEach(c => {
+          const id = c.campana_id ? String(c.campana_id) : null;
+          const name = c.campana_nombre || id;
+          const brand = c.campana_marca || 'Sin marca';
+          if (id && !campaignsMap.has(id)) {
+            campaignsMap.set(id, { id, name, marca: brand, ads: [] });
+          } else if (!id && name && !name.toLowerCase().includes('sin campaña') && !name.toLowerCase().includes('sin atribución') && !campaignsMap.has(name)) {
+            campaignsMap.set(name, { id: name, name, marca: brand, ads: [] });
+          }
+        });
+
+        // Filtrar campañas por marca seleccionada (si aplica)
+        let availableCampaigns = Array.from(campaignsMap.values());
+        if (curBrand !== 'all') {
+          availableCampaigns = availableCampaigns.filter(c => 
+            c.marca.toUpperCase() === curBrand.toUpperCase()
+          );
+        }
+
+        // Ordenar alfabéticamente por ID
+        availableCampaigns.sort((a, b) => a.id.localeCompare(b.id));
+
         const campSelect = document.getElementById('filter-campaign');
         if (campSelect) {
           campSelect.innerHTML = '<option value="all">Todas las Campañas</option>';
-          campList.forEach(c => {
+          availableCampaigns.forEach(c => {
             const opt = document.createElement('option');
-            opt.value = c;
-            opt.textContent = c;
+            opt.value = c.id;
+            const brandPrefix = c.marca && c.marca !== 'Sin marca' ? `${c.marca.toUpperCase()} · ` : '';
+            const nameSuffix = c.name && c.name !== c.id && !c.name.includes(c.id) ? ` — ${c.name}` : '';
+            opt.textContent = `${brandPrefix}ID: ${c.id}${nameSuffix}`;
             campSelect.appendChild(opt);
           });
-          campSelect.value = campList.includes(curCamp) ? curCamp : 'all';
+          const validCampValues = availableCampaigns.map(c => c.id).concat(availableCampaigns.map(c => c.name));
+          campSelect.value = validCampValues.includes(curCamp) ? curCamp : 'all';
           state.filters.campaign = campSelect.value;
         }
 
-        // 2. Filtrar anuncios según campaña seleccionada (1:N)
-        let adOps = campOps;
-        if (state.filters.campaign !== 'all') {
-          adOps = adOps.filter(o => o.campana_nombre === state.filters.campaign);
+        // 2. Recolectar anuncios disponibles según campaña seleccionada (1:N)
+        const adsMap = new Map();
+
+        // De anuncios en window.META_ADS_BY_AD_ID
+        for (const [aId, a] of Object.entries(window.META_ADS_BY_AD_ID || {})) {
+          if (!aId || !a) continue;
+          if (curBrand !== 'all' && a.marca.toUpperCase() !== curBrand.toUpperCase()) continue;
+          if (state.filters.campaign !== 'all') {
+            const curCampStr = String(state.filters.campaign);
+            if (String(a.campana_id) !== curCampStr && String(a.campana_nombre) !== curCampStr) continue;
+          }
+          adsMap.set(String(aId), {
+            id: String(aId),
+            nombre: String(a.anuncio_nombre || aId),
+            campana_id: String(a.campana_id)
+          });
         }
 
-        const adList = [...new Set(adOps.map(o => o.anuncio_nombre))].filter(Boolean).sort();
+        // De oportunidades
+        (ops || []).forEach(o => {
+          if (curBrand !== 'all' && (o.marca || '').toUpperCase() !== curBrand.toUpperCase()) return;
+          if (state.filters.campaign !== 'all') {
+            const curCampStr = String(state.filters.campaign);
+            if (String(o.campana_id) !== curCampStr && String(o.campana_nombre) !== curCampStr) return;
+          }
+          const aId = o.anuncio_id ? String(o.anuncio_id) : (o.anuncio_nombre || null);
+          if (aId && !adsMap.has(aId)) {
+            adsMap.set(aId, {
+              id: aId,
+              nombre: o.anuncio_nombre || aId,
+              campana_id: o.campana_id
+            });
+          }
+        });
+
+        // De contactos CRM
+        (state.crmContacts || []).forEach(c => {
+          if (curBrand !== 'all' && (c.campana_marca || '').toUpperCase() !== curBrand.toUpperCase()) return;
+          if (state.filters.campaign !== 'all') {
+            const curCampStr = String(state.filters.campaign);
+            if (String(c.campana_id) !== curCampStr && String(c.campana_nombre) !== curCampStr) return;
+          }
+          const aId = c.anuncio_id ? String(c.anuncio_id) : null;
+          if (aId && !adsMap.has(aId)) {
+            adsMap.set(aId, {
+              id: aId,
+              nombre: c.anuncio_nombre || aId,
+              campana_id: c.campana_id
+            });
+          }
+        });
+
+        const availableAds = Array.from(adsMap.values()).sort((a, b) => a.id.localeCompare(b.id));
         const adSelect = document.getElementById('filter-ad');
         if (adSelect) {
           adSelect.innerHTML = '<option value="all">Todos los Anuncios</option>';
-          adList.forEach(a => {
+          availableAds.forEach(a => {
             const opt = document.createElement('option');
-            opt.value = a;
-            opt.textContent = a;
+            opt.value = a.id;
+            const nameSuffix = a.nombre && a.nombre !== a.id ? ` — ${a.nombre}` : '';
+            opt.textContent = `ID: ${a.id}${nameSuffix}`;
             adSelect.appendChild(opt);
           });
-          adSelect.value = adList.includes(curAd) ? curAd : 'all';
+          const validAdValues = availableAds.map(a => a.id).concat(availableAds.map(a => a.nombre));
+          adSelect.value = validAdValues.includes(curAd) ? curAd : 'all';
           state.filters.ad = adSelect.value;
         }
 
@@ -8422,7 +9124,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       function renderOriginConversionChart(ops) {
         const origin=op=>String(op.origen || '').trim() || 'Sin origen';
         const origins=[...new Set(ops.map(origin))].sort();
-        const stages=[...new Set(['Cliente Ganado','Negociación','Seguimiento','Cotización','Demo','Asignar Producto','Cerrado-Perdido','Sin Etapa',...ops.map(op=>op.etapa)])];
+        const stages=[...new Set(['Cliente Ganado','Negociación','Seguimiento','Cotización','Demo','Asignar Producto','Cerrado-Perdido','Sin Etapa',...ops.map(op=>op.etapa).filter(Boolean)])];
         const colors=['#059669','#7C3AED','#D97706','#2563EB','#0891B2','#64748B','#E11D48','#CBD5E1'];
         const grouped=state.originMode==='stages';
         const datasets=grouped?stages.map((stage,i)=>({label:stage,data:origins.map(channel=>ops.filter(op=>origin(op)===channel && op.etapa===stage).length),backgroundColor:colors[i%colors.length]})):[{label:'Ganadas / oportunidades (%)',data:origins.map(channel=>{const group=ops.filter(op=>origin(op)===channel);return group.length?Number((group.filter(op=>op.etapa==='Cliente Ganado').length/group.length*100).toFixed(1)):0}),backgroundColor:'#2563EB'}];
