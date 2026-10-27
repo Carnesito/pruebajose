@@ -8211,12 +8211,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         // 1. Marcas
         const brandSelect = document.getElementById('filter-brand');
         if (brandSelect) {
-          const curBrand = state.filters.brand;
+          const curBrand = state.filters.brand === 'all' ? 'all' : normalizeBrandFilter(state.filters.brand);
           let brandList = [...new Set([
             ...ops.map(o => o.marca),
             ...Object.values(window.META_ADS_CATALOG || {}).map(c => c.marca),
             ...(state.crmContacts || []).map(c => c.campana_marca)
-          ])].filter(Boolean).map(b => b.toUpperCase()).sort();
+          ])].filter(Boolean).map(normalizeBrandFilter).sort();
           if (brandList.length === 0) brandList = ['FENIX', 'MAKI', 'SOLINTHA'];
           brandList = [...new Set(brandList)];
           brandSelect.innerHTML = '<option value="all">Todas las Marcas</option>';
@@ -8235,7 +8235,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         if (commSelect) {
           const curComm = state.filters.commercial;
           let commOps = ops;
-          if (state.filters.brand !== 'all') commOps = commOps.filter(o => o.marca === state.filters.brand);
+          if (state.filters.brand !== 'all') commOps = commOps.filter(o => normalizeBrandFilter(o.marca) === state.filters.brand);
           const commList = [...new Set(commOps.map(o => o.empleado))].filter(Boolean).sort();
           commSelect.innerHTML = '<option value="all">Todos los Asesores</option>';
           commList.forEach(c => {
@@ -8311,6 +8311,14 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       // MOTOR DE FILTRADO Y APLICACIÓN REACTIVA
       // ======================================================================
 
+      function normalizeBrandFilter(brand) {
+        return String(brand || '')
+          .trim()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toUpperCase();
+      }
+
       function updateSidebarBadges() {
         const all = state.allOpportunities;
         const cleans = all.filter(o => !o.es_duplicado);
@@ -8360,7 +8368,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
         // 2. Filtro de Marca
         if (state.filters.brand !== 'all') {
-          list = list.filter(o => o.marca === state.filters.brand);
+          list = list.filter(o => normalizeBrandFilter(o.marca) === state.filters.brand);
         }
 
         // 2.1 Filtro de Campaña Meta Ads (1:N)
@@ -10922,7 +10930,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           // Filtrar asesores según marca
           const commSelect = document.getElementById('filter-commercial');
           let ops = state.allOpportunities;
-          if (state.filters.brand !== 'all') ops = ops.filter(o => o.marca === state.filters.brand);
+          if (state.filters.brand !== 'all') ops = ops.filter(o => normalizeBrandFilter(o.marca) === state.filters.brand);
           const commList = [...new Set(ops.map(o => o.empleado))].filter(Boolean).sort();
           commSelect.innerHTML = '<option value="all">Todos los Asesores</option>';
           commList.forEach(c => {
@@ -14569,19 +14577,21 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       .commercial-insights-drawer {
         position: fixed;
         top: 0;
-        right: -580px;
-        width: 540px;
-        max-width: 95vw;
+        right: 0;
+        width: min(540px, 100%);
+        max-width: 100%;
         height: 100vh;
+        height: 100dvh;
         background: #ffffff;
         box-shadow: -10px 0 35px rgba(0, 0, 0, 0.25);
         z-index: 220;
         display: flex;
         flex-direction: column;
-        transition: right 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: translateX(100%);
+        transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
       }
       .commercial-insights-drawer.active {
-        right: 0;
+        transform: translateX(0);
       }
       .insights-drawer-header {
         padding: 16px 20px;
@@ -14589,6 +14599,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         border-bottom: 1px solid var(--gray-200, #e2e8f0);
         display: flex;
         justify-content: space-between;
+        gap: 12px;
         align-items: flex-start;
       }
       .insights-drawer-toolbar {
@@ -14598,9 +14609,11 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       }
       .insights-filter-pills {
         display: flex;
+        flex-wrap: wrap;
         gap: 6px;
-        overflow-x: auto;
-        padding-bottom: 4px;
+        max-height: 100px;
+        overflow-y: auto;
+        padding: 2px 2px 4px;
       }
       .insight-pill {
         background: var(--gray-100, #f1f5f9);
@@ -14626,6 +14639,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         display: inline-flex;
         align-items: center;
         gap: 5px;
+        justify-content: center;
         background: #ffffff;
         border: 1px solid var(--gray-300, #cbd5e1);
         border-radius: 5px;
@@ -14642,6 +14656,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       }
       .insights-drawer-body {
         flex: 1;
+        min-height: 0;
         overflow-y: auto;
         padding: 16px 20px;
         display: flex;
@@ -14824,6 +14839,63 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         color: var(--gray-500, #64748b);
       }
       @media (max-width: 640px) {
+        .commercial-insights-drawer {
+          width: 100%;
+          box-shadow: none;
+        }
+        .insights-drawer-header {
+          padding: 14px 14px 12px;
+          align-items: center;
+        }
+        .insights-drawer-header > div:first-child {
+          min-width: 0;
+        }
+        .insights-drawer-header h2 {
+          font-size: 15px !important;
+        }
+        .insights-drawer-header p {
+          max-width: 34ch;
+          line-height: 1.4;
+        }
+        .insights-drawer-toolbar {
+          padding: 10px 12px;
+        }
+        .insights-filter-pills {
+          max-height: 84px;
+          gap: 5px;
+        }
+        .insight-pill {
+          font-size: 10.5px;
+          padding: 4px 8px;
+        }
+        .insights-drawer-toolbar > div:last-child {
+          display: grid !important;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 7px !important;
+          margin-top: 8px !important;
+        }
+        .btn-insight-util {
+          min-height: 36px;
+          padding: 7px 8px;
+          font-size: 11px;
+        }
+        .insights-drawer-body {
+          padding: 12px;
+          gap: 10px;
+        }
+        .insight-card {
+          padding: 12px;
+        }
+        .insight-card-title {
+          font-size: 13px;
+        }
+        .insight-metric-val {
+          font-size: 15px;
+          overflow-wrap: anywhere;
+        }
+        .insight-body-block {
+          font-size: 11.5px;
+        }
         .table-ai-insight {
           width: 100%;
           margin-left: 0;
