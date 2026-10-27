@@ -8466,7 +8466,9 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
               badgeCount.textContent = crit > 0 ? crit : insights.length;
               badgeCount.className = crit > 0 ? 'badge badge-insights pulse-crit' : 'badge badge-insights';
             }
-          } catch(e) {}
+          } catch (error) {
+            console.error('No se pudieron actualizar los hallazgos comerciales:', error);
+          }
         }
 
         // Renderizar la pestaña activa
@@ -13843,8 +13845,12 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       }];
     }
 
-    const cleanOps = all.filter(o => !o.es_duplicado);
-    const targetOps = filtered.length > 0 ? filtered : cleanOps;
+    const hasActiveFilters = Object.entries(st.filters || {}).some(([key, value]) => {
+      if (key === 'crossSellingOnly') return Boolean(value);
+      if (key === 'searchQuery') return Boolean(String(value || '').trim());
+      return Boolean(value) && value !== 'all';
+    });
+    const cleanOps = (hasActiveFilters ? filtered : all).filter(o => !o.es_duplicado);
 
     // ------------------------------------------------------------------------
     // A. CAMPAÑAS & ANUNCIOS META ADS
@@ -14253,11 +14259,16 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     updateTabCount('cnt-tab-audit', insights.filter(i => i.category === 'audit').length);
 
     if (filteredList.length === 0) {
+      const noFilteredRows = window.state &&
+        Array.isArray(window.state.allOpportunities) &&
+        window.state.allOpportunities.length > 0 &&
+        Array.isArray(window.state.filteredOpportunities) &&
+        window.state.filteredOpportunities.length === 0;
       container.innerHTML = `
         <div class="empty-state" style="padding:40px 20px; text-align:center;">
           <div style="font-size:32px; margin-bottom:8px;">✨</div>
-          <div style="font-weight:700; color:var(--gray-800); font-size:15px;">No se registran alertas en este criterio</div>
-          <div style="color:var(--gray-500); font-size:12px; margin-top:4px;">Los datos analizados cumplen con los estándares comerciales y financieros establecidos.</div>
+          <div style="font-weight:700; color:var(--gray-800); font-size:15px;">${noFilteredRows ? 'No hay registros con los filtros actuales' : 'No se detectaron hallazgos en este criterio'}</div>
+          <div style="color:var(--gray-500); font-size:12px; margin-top:4px;">${noFilteredRows ? 'Ajusta los filtros o amplía el periodo para generar un análisis.' : 'No se encontraron alertas para mostrar con los datos disponibles.'}</div>
         </div>
       `;
       return;
@@ -14393,13 +14404,18 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <span>Hallazgos Inteligentes</span>
         <span id="badge-insights-count" class="badge badge-insights">0</span>
       `;
-      btn.addEventListener('click', openCommercialInsightsDrawer);
 
       if (summaryRight) {
         summaryRight.insertBefore(btn, summaryRight.firstChild);
       } else if (headerBar) {
         headerBar.appendChild(btn);
       }
+    }
+
+    const insightsButton = document.getElementById('btn-open-insights');
+    if (insightsButton && !insightsButton.dataset.insightsBound) {
+      insightsButton.addEventListener('click', openCommercialInsightsDrawer);
+      insightsButton.dataset.insightsBound = 'true';
     }
 
     // 2. Inyectar Drawer y Backdrop si no existen
@@ -14457,21 +14473,39 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         <div class="insights-drawer-body" id="insights-cards-container"></div>
       `;
       document.body.appendChild(drawer);
+    }
 
-      // Listeners del Drawer
-      document.getElementById('btn-close-insights')?.addEventListener('click', closeCommercialInsightsDrawer);
-      document.getElementById('btn-refresh-insights')?.addEventListener('click', renderCommercialInsights);
-      document.getElementById('btn-copy-insights-report')?.addEventListener('click', copyInsightsReportToClipboard);
-
-      // Listeners de los filtros por categoría
-      document.querySelectorAll('#insights-filter-pills .insight-pill').forEach(pill => {
-        pill.addEventListener('click', () => {
-          document.querySelectorAll('#insights-filter-pills .insight-pill').forEach(p => p.classList.remove('active'));
-          pill.classList.add('active');
-          activeInsightFilter = pill.getAttribute('data-filter') || 'all';
-          renderCommercialInsights();
-        });
+    // Los elementos pueden venir incluidos en el HTML o crearse dinámicamente.
+    const closeButton = document.getElementById('btn-close-insights');
+    if (closeButton && !closeButton.dataset.insightsBound) {
+      closeButton.addEventListener('click', closeCommercialInsightsDrawer);
+      closeButton.dataset.insightsBound = 'true';
+    }
+    const refreshButton = document.getElementById('btn-refresh-insights');
+    if (refreshButton && !refreshButton.dataset.insightsBound) {
+      refreshButton.addEventListener('click', renderCommercialInsights);
+      refreshButton.dataset.insightsBound = 'true';
+    }
+    const copyButton = document.getElementById('btn-copy-insights-report');
+    if (copyButton && !copyButton.dataset.insightsBound) {
+      copyButton.addEventListener('click', copyInsightsReportToClipboard);
+      copyButton.dataset.insightsBound = 'true';
+    }
+    document.querySelectorAll('#insights-filter-pills .insight-pill').forEach(pill => {
+      if (pill.dataset.insightsBound) return;
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('#insights-filter-pills .insight-pill').forEach(item => item.classList.remove('active'));
+        pill.classList.add('active');
+        activeInsightFilter = pill.getAttribute('data-filter') || 'all';
+        renderCommercialInsights();
       });
+      pill.dataset.insightsBound = 'true';
+    });
+
+    const backdrop = document.getElementById('drawer-insights-backdrop');
+    if (backdrop && !backdrop.dataset.insightsBound) {
+      backdrop.addEventListener('click', closeCommercialInsightsDrawer);
+      backdrop.dataset.insightsBound = 'true';
     }
 
     // 3. Inyectar estilos CSS específicos
@@ -14715,6 +14749,50 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         text-decoration: underline;
       }
 
+      .table-ai-insight {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        width: min(100%, 560px);
+        margin: 0 0 10px auto;
+        padding: 11px 13px;
+        color: #1e293b;
+        background: linear-gradient(120deg, #f0f9ff, #f5f3ff);
+        border: 1px solid #c7d2fe;
+        border-radius: 9px;
+        box-shadow: 0 4px 14px rgba(30, 64, 175, 0.07);
+      }
+      .table-ai-insight-icon {
+        display: grid;
+        flex: 0 0 28px;
+        width: 28px;
+        height: 28px;
+        place-items: center;
+        color: #4f46e5;
+        background: #e0e7ff;
+        border-radius: 8px;
+      }
+      .table-ai-insight-copy {
+        min-width: 0;
+        font-size: 11.5px;
+        line-height: 1.5;
+      }
+      .table-ai-insight-label {
+        margin-bottom: 2px;
+        color: #4338ca;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.7px;
+        text-transform: uppercase;
+      }
+      .table-ai-insight-copy p {
+        margin: 0;
+      }
+      .table-ai-insight-tip {
+        margin-top: 3px !important;
+        color: #475569;
+      }
+
       /* KPI Cards de Conciliación en tab-audit */
       .recon-kpi-grid {
         display: grid;
@@ -14745,8 +14823,159 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         font-size: 10.5px;
         color: var(--gray-500, #64748b);
       }
+      @media (max-width: 640px) {
+        .table-ai-insight {
+          width: 100%;
+          margin-left: 0;
+        }
+      }
     `;
     document.head.appendChild(styleEl);
+  }
+
+  const TABLE_INSIGHT_SELECTOR = 'table.financial-table, table.lead-matrix-table';
+
+  function parseTableInsightNumber(text) {
+    let value = String(text || '').replace(/[^\d,.-]/g, '');
+    if (!/\d/.test(value)) return null;
+
+    const comma = value.lastIndexOf(',');
+    const dot = value.lastIndexOf('.');
+    if (comma !== -1 && dot !== -1) {
+      const decimalSeparator = comma > dot ? ',' : '.';
+      const thousandsSeparator = decimalSeparator === ',' ? /\./g : /,/g;
+      value = value.replace(thousandsSeparator, '');
+      if (decimalSeparator === ',') value = value.replace(',', '.');
+    } else if (comma !== -1 || dot !== -1) {
+      const separator = comma !== -1 ? ',' : '.';
+      const lastSeparator = value.lastIndexOf(separator);
+      const decimals = value.length - lastSeparator - 1;
+      if (decimals > 0 && decimals <= 2) {
+        if (separator === ',') value = value.replace(',', '.');
+      } else {
+        value = value.replace(/[,.]/g, '');
+      }
+    }
+
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  function escapeInsightText(value) {
+    return String(value || '').replace(/[&<>"']/g, char => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;'
+    })[char]);
+  }
+
+  function buildTableInsight(table) {
+    const headerRow = table.querySelector('thead tr:last-child') || table.querySelector('tr');
+    const headers = headerRow
+      ? Array.from(headerRow.cells).map(cell => cell.textContent.trim())
+      : [];
+    const rows = Array.from(table.querySelectorAll('tbody tr, tr'))
+      .filter(row => row.querySelector('td') && !row.querySelector('td[colspan]'));
+    const cardTitle = table.closest('.card')?.querySelector('.card-title')?.textContent.trim();
+    const context = cardTitle ? ` · ${cardTitle}` : '';
+    let diagnosis;
+    let recommendation;
+
+    if (rows.length === 0) {
+      diagnosis = 'No hay registros visibles en esta tabla con la carga y los filtros actuales.';
+      recommendation = 'Confirma que los datos estén cargados y revisa los filtros antes de tomar decisiones.';
+    } else if (rows.length === 1) {
+      diagnosis = 'Hay 1 registro visible; todavía no hay una base de comparación dentro de esta tabla.';
+      recommendation = 'Amplía el periodo o los filtros para comparar tendencias y priorizar acciones.';
+    } else {
+      const columns = Array.from({ length: Math.max(...rows.map(row => row.cells.length)) }, (_, index) => {
+        const heading = headers[index] || `Columna ${index + 1}`;
+        const identityColumn = /\b(id|ruc|c[eé]dula|tel[eé]fono|fila|fecha)\b/i.test(heading);
+        const values = rows.map((row, rowIndex) => ({
+          rowIndex,
+          value: parseTableInsightNumber(row.cells[index]?.textContent)
+        })).filter(item => item.value !== null);
+        const metricColumn = /(monto|venta|factur|ingreso|valor|cantidad|total|lead|oportun|convers|tasa|roi|roas|invers|presupuesto|costo|d[ií]as|ticket|porcentaje|%)\b/i.test(heading);
+        return { heading, identityColumn, metricColumn, values };
+      }).filter(column => !column.identityColumn && column.values.length >= 2)
+        .sort((a, b) => Number(b.metricColumn) - Number(a.metricColumn) || b.values.length - a.values.length);
+
+      if (columns.length === 0) {
+        diagnosis = `Hay ${rows.length} registros visibles, pero no se identificó una columna numérica comparable.`;
+        recommendation = 'Revisa el detalle de los registros y valida la consistencia de los datos antes de concluir.';
+      } else {
+        const column = columns[0];
+        const lowest = column.values.reduce((result, item) => item.value < result.value ? item : result);
+        const highest = column.values.reduce((result, item) => item.value > result.value ? item : result);
+        const rowLabel = rows[highest.rowIndex].cells[0]?.textContent.trim() || `registro ${highest.rowIndex + 1}`;
+        const format = value => new Intl.NumberFormat('es-EC', { maximumFractionDigits: 2 }).format(value);
+        diagnosis = highest.value === lowest.value
+          ? `Los ${column.values.length} valores visibles de «${column.heading}» están alineados en ${format(highest.value)}.`
+          : `El mayor valor de «${column.heading}» está en «${rowLabel}» (${format(highest.value)}); el menor es ${format(lowest.value)}.`;
+        recommendation = highest.value === lowest.value
+          ? 'Mantén el seguimiento y contrasta con otros periodos para detectar cambios relevantes.'
+          : 'Revisa qué explica la diferencia entre los extremos antes de reasignar presupuesto o esfuerzo.';
+      }
+    }
+
+    return `
+      <div class="table-ai-insight-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3Z"/><path d="m19 14 .9 2.1L22 17l-2.1.9L19 20l-.9-2.1L16 17l2.1-.9L19 14Z"/></svg>
+      </div>
+      <div class="table-ai-insight-copy">
+        <div class="table-ai-insight-label">Fénix AI · lectura local${escapeInsightText(context)}</div>
+        <p>${escapeInsightText(diagnosis)}</p>
+        <p class="table-ai-insight-tip"><strong>Sugerencia:</strong> ${escapeInsightText(recommendation)}</p>
+      </div>
+    `;
+  }
+
+  function refreshTableInsight(table) {
+    if (!table.matches(TABLE_INSIGHT_SELECTOR) || !table.parentNode) return;
+    let panel = table.previousElementSibling;
+    if (!panel || !panel.classList.contains('table-ai-insight')) {
+      panel = document.createElement('section');
+      panel.className = 'table-ai-insight';
+      panel.setAttribute('aria-live', 'polite');
+      panel.setAttribute('aria-label', 'Análisis automático de esta tabla');
+      table.parentNode.insertBefore(panel, table);
+    }
+    panel.innerHTML = buildTableInsight(table);
+  }
+
+  function initTableInsights() {
+    document.querySelectorAll(TABLE_INSIGHT_SELECTOR).forEach(refreshTableInsight);
+    if (!document.body || window.tableInsightObserver) return;
+
+    const pendingTables = new Set();
+    let refreshScheduled = false;
+    const observer = new MutationObserver(records => {
+      records.forEach(record => {
+        const target = record.target.nodeType === Node.ELEMENT_NODE
+          ? record.target
+          : record.target.parentElement;
+        const containingTable = target?.closest(TABLE_INSIGHT_SELECTOR);
+        if (containingTable) pendingTables.add(containingTable);
+
+        record.addedNodes.forEach(node => {
+          if (node.nodeType !== Node.ELEMENT_NODE) return;
+          if (node.matches(TABLE_INSIGHT_SELECTOR)) pendingTables.add(node);
+          node.querySelectorAll(TABLE_INSIGHT_SELECTOR).forEach(table => pendingTables.add(table));
+        });
+      });
+
+      if (!pendingTables.size || refreshScheduled) return;
+      refreshScheduled = true;
+      window.setTimeout(() => {
+        refreshScheduled = false;
+        pendingTables.forEach(refreshTableInsight);
+        pendingTables.clear();
+      }, 0);
+    });
+    observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+    window.tableInsightObserver = observer;
   }
 
   // ==========================================================================
@@ -14755,6 +14984,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   function init() {
     // Inyectar UI elements
     injectInsightsUIElements();
+    initTableInsights();
 
     // Actualizar badge de insights
     const insights = generateCommercialInsights();
@@ -14788,33 +15018,36 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
 
 
   <!-- DRAWER LATERAL DE HALLAZGOS INTELIGENTES -->
-  <div id="drawer-insights-backdrop" class="drawer-backdrop" onclick="if(window.closeCommercialInsightsDrawer) window.closeCommercialInsightsDrawer();"></div>
+  <div id="drawer-insights-backdrop" class="drawer-backdrop"></div>
   <aside id="drawer-commercial-insights" class="commercial-insights-drawer">
     <div class="insights-drawer-header">
       <div>
         <div style="display:flex; align-items:center; gap:8px;">
-          <span style="font-size:22px;">💡</span>
+          <span style="font-size:22px;" aria-hidden="true">✦</span>
           <h2 style="font-size:17px; font-weight:800; color:var(--gray-900); margin:0;">Hallazgos Inteligentes</h2>
         </div>
         <p style="font-size:11.5px; color:var(--gray-500); margin-top:3px; margin-bottom:0;">
-          Diagnóstico reactivo comercial, de atribución y calidad de datos
+          Análisis automático de tus datos comerciales y recomendaciones accionables
         </p>
       </div>
       <div style="display:flex; align-items:center; gap:8px;">
-        <button type="button" class="btn-fenix-action" onclick="if(window.copyInsightsReportToClipboard) window.copyInsightsReportToClipboard();" title="Copiar reporte ejecutivo para compartir" style="padding:4px 8px; font-size:11px;">
-          📋 Copiar Reporte
-        </button>
-        <button type="button" class="btn-drawer-close" onclick="if(window.closeCommercialInsightsDrawer) window.closeCommercialInsightsDrawer();" title="Cerrar panel">&times;</button>
+        <button type="button" class="drawer-close-btn" id="btn-close-insights" title="Cerrar panel" aria-label="Cerrar panel">&times;</button>
       </div>
     </div>
-    <div class="insights-tabs" id="insights-domain-tabs">
-      <button type="button" class="insights-tab active" data-domain="all">Todos</button>
-      <button type="button" class="insights-tab" data-domain="critical">Críticos 🔴</button>
-      <button type="button" class="insights-tab" data-domain="opportunity">Oportunidad 🟢</button>
-      <button type="button" class="insights-tab" data-domain="campaign">Campañas 📢</button>
-      <button type="button" class="insights-tab" data-domain="demo">Demos ⚡</button>
-      <button type="button" class="insights-tab" data-domain="forecast">Forecast 💼</button>
-      <button type="button" class="insights-tab" data-domain="audit">Auditoría 🛡️</button>
+    <div class="insights-drawer-toolbar">
+      <div class="insights-filter-pills" id="insights-filter-pills">
+        <button type="button" class="insight-pill active" data-filter="all">Todos (<span id="cnt-tab-all">0</span>)</button>
+        <button type="button" class="insight-pill" data-filter="critical">Críticos 🔴 (<span id="cnt-tab-critical">0</span>)</button>
+        <button type="button" class="insight-pill" data-filter="opportunity">Oportunidades 🟢 (<span id="cnt-tab-opportunity">0</span>)</button>
+        <button type="button" class="insight-pill" data-filter="forecast">Forecast 💼 (<span id="cnt-tab-forecast">0</span>)</button>
+        <button type="button" class="insight-pill" data-filter="marketing">Campañas 📢 (<span id="cnt-tab-marketing">0</span>)</button>
+        <button type="button" class="insight-pill" data-filter="demos">Demos ⚡ (<span id="cnt-tab-demos">0</span>)</button>
+        <button type="button" class="insight-pill" data-filter="audit">Auditoría 🛡️ (<span id="cnt-tab-audit">0</span>)</button>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <button type="button" class="btn-insight-util" id="btn-refresh-insights" title="Reevaluar hallazgos con los filtros actuales">Actualizar análisis</button>
+        <button type="button" class="btn-insight-util" id="btn-copy-insights-report" title="Copiar informe ejecutivo al portapapeles">Copiar resumen</button>
+      </div>
     </div>
     <div class="insights-drawer-body" id="insights-cards-container">
       <div style="text-align:center; padding:30px; color:var(--gray-500);">
